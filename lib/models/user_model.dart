@@ -30,13 +30,23 @@ class UserModel {
   }
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
+    DateTime created;
+    if (map['createdAt'] is String) {
+      created = DateTime.tryParse(map['createdAt']) ?? DateTime.now();
+    } else if (map['createdAt'] is Timestamp) {
+      created = (map['createdAt'] as Timestamp).toDate();
+    } else {
+      created = DateTime.now();
+    }
+
     return UserModel(
-      map['uid'],
-      map['name'],
-      map['phone'],
-      map['email'],
-      map['role'],
-      (map['createdAt'] as Timestamp).toDate(),
+      map['uid'] ?? map['id'] ?? "unknown",
+      map['name'] ?? "Student",
+      map['phone'] ?? "Not Set",
+      map['email'] ?? "Not Set",
+      map['role'] ?? "User",
+      created,
     );
   }
+
 }
