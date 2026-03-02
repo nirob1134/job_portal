@@ -63,7 +63,8 @@ class FavouriteJobsScreen extends StatelessWidget {
                       children: [
                         const CircleAvatar(
                           radius: 26,
-                          backgroundImage: AssetImage('assets/images/diu_logo.jpg'),
+                          backgroundImage:
+                          AssetImage('assets/images/diu_logo.jpg'),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -129,25 +130,31 @@ class FavouriteJobsScreen extends StatelessWidget {
     );
   }
 
-  // Badge widget
+  // Badge widget with overflow fix
   Widget _detailBadge(IconData icon, Color color, String text) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
         color: color.withOpacity(0.15),
         borderRadius: BorderRadius.circular(8),
       ),
+      constraints: const BoxConstraints(maxWidth: 280), // optional max width
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, color: color, size: 18),
-          const SizedBox(width: 4),
-          Text(
-            text,
-            style: TextStyle(
-              color: Colors.grey.shade700,
-              fontWeight: FontWeight.w500,
-              fontSize: 12,
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              text,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              softWrap: true,
+              style: TextStyle(
+                color: Colors.grey.shade700,
+                fontWeight: FontWeight.w500,
+                fontSize: 12,
+              ),
             ),
           ),
         ],
