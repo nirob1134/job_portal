@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../models/application_model.dart';
+import '../../utils/emailSender.dart';
+
 
 const Color primaryTeal = Color(0xFF3CC6C6);
 
@@ -47,7 +49,7 @@ class JobApplicationsScreen extends StatelessWidget {
             itemCount: applications.length,
             itemBuilder: (context, index) {
               final app = applications[index];
-              return _applicationCard(app);
+              return _applicationCard(context, app);
             },
           );
         },
@@ -55,7 +57,7 @@ class JobApplicationsScreen extends StatelessWidget {
     );
   }
 
-  Widget _applicationCard(ApplicationModel app) {
+  Widget _applicationCard(BuildContext context, ApplicationModel app) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -73,26 +75,17 @@ class JobApplicationsScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Applicant Name
           Text(
             app.userName,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 6),
-
-          // Basic info rows
           _infoRow("Email", app.userEmail),
           _infoRow("Phone", app.userPhone),
           _infoRow("Student ID", app.studentId),
           _infoRow("Semester", app.runningSemester),
           _infoRow("CGPA", app.cgpa),
-
           const SizedBox(height: 8),
-
-          // Cover Letter
           const Text(
             "Cover Letter",
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -102,10 +95,7 @@ class JobApplicationsScreen extends StatelessWidget {
             app.coverLetter,
             style: TextStyle(color: Colors.grey.shade800, fontSize: 15),
           ),
-
           const SizedBox(height: 12),
-
-          // Action buttons
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -115,11 +105,13 @@ class JobApplicationsScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
-                onPressed: () => updateStatus(app.id, 'accepted'),
+                onPressed: () => _updateStatus(context, app, 'accepted'),
                 icon: const Icon(Icons.check),
-                label: const Text("Accept",style: TextStyle(color: Colors.white),),
+                label: const Text("Accept",
+                    style: TextStyle(color: Colors.white)),
               ),
               const SizedBox(width: 8),
               ElevatedButton.icon(
@@ -128,22 +120,22 @@ class JobApplicationsScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
-                onPressed: () => updateStatus(app.id, 'rejected'),
+                onPressed: () => _updateStatus(context, app, 'rejected'),
                 icon: const Icon(Icons.close),
-                label: const Text("Reject",style: TextStyle(color: Colors.white)),
+                label: const Text("Reject",
+                    style: TextStyle(color: Colors.white)),
               ),
             ],
           ),
-
           const SizedBox(height: 8),
-
-          // Status
           Align(
             alignment: Alignment.centerRight,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              padding:
+              const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
                 color: _statusColor(app.status),
                 borderRadius: BorderRadius.circular(12),
@@ -162,7 +154,6 @@ class JobApplicationsScreen extends StatelessWidget {
     );
   }
 
-  // Helper for basic info rows
   Widget _infoRow(String title, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
@@ -175,9 +166,7 @@ class JobApplicationsScreen extends StatelessWidget {
             TextSpan(
               text: value,
               style: TextStyle(
-                fontWeight: FontWeight.normal,
-                color: Colors.grey.shade800,
-              ),
+                  fontWeight: FontWeight.normal, color: Colors.grey.shade800),
             ),
           ],
         ),
@@ -185,7 +174,6 @@ class JobApplicationsScreen extends StatelessWidget {
     );
   }
 
-  // Status color helper
   Color _statusColor(String status) {
     switch (status.toLowerCase()) {
       case 'accepted':
@@ -197,13 +185,36 @@ class JobApplicationsScreen extends StatelessWidget {
     }
   }
 
-  // Update Firestore status
-  void updateStatus(String docId, String status) {
-    FirebaseFirestore.instance
-        .collection('applications')
-        .doc(docId)
-        .update({'status': status}).catchError((error) {
-      debugPrint('Failed to update status: $error');
-    });
+  void _updateStatus(
+      BuildContext context, ApplicationModel app, String status) async {
+    try {
+      // Update Firestore
+      await FirebaseFirestore.instance
+          .collection('applications')
+          .doc(app.id)
+          .update({'status': status});
+
+      // Send Email via your emailSender.dart function
+      await sendEmailJS(
+        userName: app.userName,
+        userEmail: app.userEmail,
+        jobTitle: app.jobTitle,
+        status: status,
+      );
+
+      // Only show SnackBar if the widget is still mounted
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Application $status & email sent!')),
+        );
+      }
+    } catch (error) {
+      debugPrint('Failed to update status or send email: $error');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to update status/email')),
+        );
+      }
+    }
   }
 }
