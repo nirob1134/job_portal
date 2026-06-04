@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:job_portal/screens/admin/transport/post_transport_screen.dart';
-import 'package:job_portal/screens/admin/transport/transport_admin_profile.dart';
 
 import 'admin_transport_screen.dart';
-
-
+import 'transport_admin_profile.dart';
 
 const Color primaryTeal = Color(0xFF3CC6C6);
+const Color bgColor = Color(0xFFF8F9FB);
 
 class TransportAdminHome extends StatefulWidget {
   const TransportAdminHome({super.key});
@@ -16,7 +14,6 @@ class TransportAdminHome extends StatefulWidget {
 }
 
 class _TransportAdminHomeState extends State<TransportAdminHome> {
-
   int _currentIndex = 0;
 
   final List<Widget> _pages = const [
@@ -26,63 +23,42 @@ class _TransportAdminHomeState extends State<TransportAdminHome> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-
-      // ================= BODY =================
+      backgroundColor: bgColor,
       body: IndexedStack(
         index: _currentIndex,
         children: _pages,
       ),
-
-      // ================= FLOATING BUTTON =================
-      floatingActionButton: _currentIndex == 0
-          ? FloatingActionButton.extended(
-        backgroundColor: primaryTeal,
-        icon: const Icon(Icons.add),
-        label: const Text("Post Transport"),
-        onPressed: () {
-
-          Navigator.push(context, MaterialPageRoute(builder: (_)=>PostTransportScreen()));
-
-        },
-      )
-          : null,
-
-      // ================= BOTTOM NAV =================
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
+          color: Colors.white,
           boxShadow: [
             BoxShadow(
-              blurRadius: 10,
-              color: Colors.black12,
-            )
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, -4),
+            ),
           ],
         ),
-
         child: BottomNavigationBar(
-
           currentIndex: _currentIndex,
-
+          backgroundColor: Colors.white,
+          elevation: 0,
+          selectedItemColor: primaryTeal,
+          unselectedItemColor: Colors.grey,
+          type: BottomNavigationBarType.fixed,
+          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
           onTap: (index) {
             setState(() {
               _currentIndex = index;
             });
           },
-
-          selectedItemColor: primaryTeal,
-          unselectedItemColor: Colors.grey,
-
-          type: BottomNavigationBarType.fixed,
-
           items: const [
-
             BottomNavigationBarItem(
               icon: Icon(Icons.directions_bus_outlined),
               activeIcon: Icon(Icons.directions_bus),
-              label: "Transport Jobs",
+              label: "Jobs",
             ),
-
             BottomNavigationBarItem(
               icon: Icon(Icons.person_outline),
               activeIcon: Icon(Icons.person),

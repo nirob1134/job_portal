@@ -16,14 +16,12 @@ class MyAuthProvider with ChangeNotifier {
   bool loading = false;
   String? userRole; // cached role
 
-  // ================= LOADING =================
   void _loading(bool value){
     loading = value;
     notifyListeners();
   }
 
-  // ================= REGISTER =================
-  // Always create STUDENT manually
+
   Future<void> registration(
       String name,
       String email,
@@ -45,7 +43,7 @@ class MyAuthProvider with ChangeNotifier {
         name,
         phone,
         email,
-        Roles.student, // ✅ ALWAYS lowercase
+        Roles.student,
         DateTime.now(),
       );
 
@@ -55,7 +53,7 @@ class MyAuthProvider with ChangeNotifier {
 
       Navigator.pushNamedAndRemoveUntil(
         navigatorKey.currentContext!,
-        RouteHelper.roleGate, // ⭐ VERY IMPORTANT
+        RouteHelper.roleGate,
             (value) => false,
       );
 
@@ -68,7 +66,7 @@ class MyAuthProvider with ChangeNotifier {
     }
   }
 
-  // ================= LOGIN =================
+
   Future<void> login(String email,String password) async {
 
     _loading(true);
@@ -80,7 +78,7 @@ class MyAuthProvider with ChangeNotifier {
         password: password.trim(),
       );
 
-      // 🔥 Load role once
+
       await loadUserRole(result.user!.uid);
 
       Navigator.pushNamedAndRemoveUntil(
@@ -98,7 +96,7 @@ class MyAuthProvider with ChangeNotifier {
     }
   }
 
-  // ================= LOAD USER ROLE =================
+
   Future<void> loadUserRole(String uid) async {
 
     final snap = await db.collection('users').doc(uid).get();
@@ -115,7 +113,7 @@ class MyAuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // ================= FORGOT PASSWORD =================
+
   Future<void> forgotPassword(String email) async {
 
     try {
@@ -131,7 +129,7 @@ class MyAuthProvider with ChangeNotifier {
     }
   }
 
-  // ================= LOGOUT =================
+
   Future<void> logout() async {
 
     try {

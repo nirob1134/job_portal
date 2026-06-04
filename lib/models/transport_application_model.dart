@@ -29,7 +29,7 @@ class TransportApplicationModel {
     required this.status,
   });
 
-  // Factory constructor: Firestore → Model
+
   factory TransportApplicationModel.fromMap(
       Map<String, dynamic> map, String id) {
     return TransportApplicationModel(
@@ -49,7 +49,7 @@ class TransportApplicationModel {
     );
   }
 
-  // Model → Firestore
+
   Map<String, dynamic> toMap() {
     return {
       'transportJobId': transportJobId,

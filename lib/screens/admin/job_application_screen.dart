@@ -1,152 +1,255 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../models/application_model.dart';
 import '../../utils/emailSender.dart';
-
 
 const Color primaryTeal = Color(0xFF3CC6C6);
 
 class JobApplicationsScreen extends StatelessWidget {
   final String jobId;
 
-  const JobApplicationsScreen({super.key, required this.jobId});
+  const JobApplicationsScreen({
+    super.key,
+    required this.jobId,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
-      appBar: AppBar(
-        title: const Text('Job Applications'),
-        backgroundColor: primaryTeal,
-        elevation: 0,
+      backgroundColor: const Color(0xFFF8F9FB),
+      body: Column(
+        children: [
+          _buildHeader(context),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('applications')
+                  .where('jobId', isEqualTo: jobId)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      'No applications yet',
+                      style: TextStyle(fontSize: 16, color: Colors.black54),
+                    ),
+                  );
+                }
+
+                final applications = snapshot.data!.docs.map((doc) {
+                  final data = doc.data() as Map<String, dynamic>;
+                  return ApplicationModel.fromMap(data, doc.id);
+                }).toList();
+
+                return ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: applications.length,
+                  itemBuilder: (context, index) {
+                    return _applicationCard(context, applications[index]);
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('applications')
-            .where('jobId', isEqualTo: jobId)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+    );
+  }
 
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(
-              child: Text(
-                'No applications yet',
-                style: TextStyle(fontSize: 18, color: Colors.black54),
-              ),
-            );
-          }
-
-          final applications = snapshot.data!.docs.map((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            return ApplicationModel.fromMap(data, doc.id);
-          }).toList();
-
-          return ListView.builder(
-            padding: const EdgeInsets.all(12),
-            itemCount: applications.length,
-            itemBuilder: (context, index) {
-              final app = applications[index];
-              return _applicationCard(context, app);
-            },
-          );
-        },
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(16, 50, 20, 30),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF081A2F), Color(0xFF0E2A47)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(38),
+          bottomRight: Radius.circular(38),
+        ),
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.white24,
+            ),
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+          ),
+          const SizedBox(width: 8),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Admin Review",
+                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  "Job Applications",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          CircleAvatar(
+            backgroundColor: Colors.white24,
+            child: Icon(Icons.people_outline, color: Colors.white),
+          ),
+        ],
       ),
     );
   }
 
   Widget _applicationCard(BuildContext context, ApplicationModel app) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6,
-            offset: Offset(0, 3),
-          ),
-        ],
-      ),
+      decoration: _cardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            app.userName,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: primaryTeal.withOpacity(0.15),
+                child: Text(
+                  app.userName.isNotEmpty ? app.userName[0].toUpperCase() : "A",
+                  style: const TextStyle(
+                    color: primaryTeal,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  app.userName,
+                  style: const TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF081A2F),
+                  ),
+                ),
+              ),
+              _statusBadge(app.status),
+            ],
           ),
-          const SizedBox(height: 6),
-          _infoRow("Email", app.userEmail),
-          _infoRow("Phone", app.userPhone),
-          _infoRow("Student ID", app.studentId),
-          _infoRow("Semester", app.runningSemester),
-          _infoRow("CGPA", app.cgpa),
-          const SizedBox(height: 8),
+
+          const SizedBox(height: 14),
+
+          _infoTile(Icons.email_outlined, "Email", app.userEmail),
+          _infoTile(Icons.phone_outlined, "Phone", app.userPhone),
+          _infoTile(Icons.badge_outlined, "Student ID", app.studentId),
+          _infoTile(Icons.school_outlined, "Semester", app.runningSemester),
+          _infoTile(Icons.grade_outlined, "CGPA", app.cgpa),
+
+          const SizedBox(height: 14),
+
           const Text(
             "Cover Letter",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Color(0xFF081A2F),
+            ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            app.coverLetter,
-            style: TextStyle(color: Colors.grey.shade800, fontSize: 15),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                ),
-                onPressed: () => _updateStatus(context, app, 'accepted'),
-                icon: const Icon(Icons.check),
-                label: const Text("Accept",
-                    style: TextStyle(color: Colors.white)),
+
+          const SizedBox(height: 6),
+
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8F9FB),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Text(
+              app.coverLetter,
+              style: TextStyle(
+                color: Colors.grey.shade700,
+                height: 1.5,
               ),
-              const SizedBox(width: 8),
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  onPressed: () => _updateStatus(context, app, 'accepted'),
+                  icon: const Icon(Icons.check_circle_outline, size: 18),
+                  label: const Text("Accept"),
                 ),
-                onPressed: () => _updateStatus(context, app, 'rejected'),
-                icon: const Icon(Icons.close),
-                label: const Text("Reject",
-                    style: TextStyle(color: Colors.white)),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () => _updateStatus(context, app, 'rejected'),
+                  icon: const Icon(Icons.cancel_outlined, size: 18),
+                  label: const Text("Reject"),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Container(
-              padding:
-              const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: _statusColor(app.status),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                app.status.isNotEmpty ? app.status.toUpperCase() : 'PENDING',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+        ],
+      ),
+    );
+  }
+
+  Widget _infoTile(IconData icon, String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 7),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: primaryTeal),
+          const SizedBox(width: 8),
+          Text(
+            "$title: ",
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF081A2F),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(color: Colors.grey.shade700),
             ),
           ),
         ],
@@ -154,21 +257,22 @@ class JobApplicationsScreen extends StatelessWidget {
     );
   }
 
-  Widget _infoRow(String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: RichText(
-        text: TextSpan(
-          text: "$title: ",
-          style: const TextStyle(
-              fontWeight: FontWeight.bold, color: Colors.black, fontSize: 15),
-          children: [
-            TextSpan(
-              text: value,
-              style: TextStyle(
-                  fontWeight: FontWeight.normal, color: Colors.grey.shade800),
-            ),
-          ],
+  Widget _statusBadge(String status) {
+    final color = _statusColor(status);
+    final label = status.isNotEmpty ? status.toUpperCase() : 'PENDING';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
@@ -185,16 +289,31 @@ class JobApplicationsScreen extends StatelessWidget {
     }
   }
 
+  BoxDecoration _cardDecoration() {
+    return BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(22),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.06),
+          blurRadius: 14,
+          offset: const Offset(0, 6),
+        ),
+      ],
+    );
+  }
+
   void _updateStatus(
-      BuildContext context, ApplicationModel app, String status) async {
+      BuildContext context,
+      ApplicationModel app,
+      String status,
+      ) async {
     try {
-      // Update Firestore
       await FirebaseFirestore.instance
           .collection('applications')
           .doc(app.id)
           .update({'status': status});
 
-      // Send Email via your emailSender.dart function
       await sendEmailJS(
         userName: app.userName,
         userEmail: app.userEmail,
@@ -202,17 +321,21 @@ class JobApplicationsScreen extends StatelessWidget {
         status: status,
       );
 
-      // Only show SnackBar if the widget is still mounted
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Application $status & email sent!')),
+          SnackBar(
+            content: Text('Application $status & email sent!'),
+          ),
         );
       }
     } catch (error) {
       debugPrint('Failed to update status or send email: $error');
+
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to update status/email')),
+          const SnackBar(
+            content: Text('Failed to update status/email'),
+          ),
         );
       }
     }

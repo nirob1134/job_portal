@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../models/job_model.dart';
 import '../../utils/route_helper.dart';
 
@@ -7,136 +8,280 @@ const Color primaryTeal = Color(0xFF3CC6C6);
 class JobDetailsAdmin extends StatelessWidget {
   final JobModel job;
 
-  const JobDetailsAdmin({super.key, required this.job});
+  const JobDetailsAdmin({
+    super.key,
+    required this.job,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
-      appBar: AppBar(
-        title: Text(job.title),
-        backgroundColor: primaryTeal,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 8,
-                offset: Offset(0, 4),
+      backgroundColor: const Color(0xFFF8F9FB),
+      body: Column(
+        children: [
+          _buildHeader(context),
+
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  _detailsCard(context),
+                ],
               ),
-            ],
+            ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Job Title
-              Text(
-                job.title,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // Department
-              if (job.department.isNotEmpty)
-                _infoRow("Department", job.department),
-
-              // Salary
-              if (job.salary.isNotEmpty) _infoRow("Salary", job.salary),
-
-              // Deadline
-              if (job.deadline != null)
-                _infoRow(
-                  "Deadline",
-                  job.deadline!.toLocal().toString().split(' ')[0],
-                ),
-
-              // Posted on
-              if (job.createdAt != null)
-                _infoRow(
-                  "Posted on",
-                  job.createdAt!.toLocal().toString().split(' ')[0],
-                ),
-
-              const SizedBox(height: 16),
-
-              // Description
-              const Text(
-                "Description",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                job.description,
-                style: TextStyle(color: Colors.grey.shade800, fontSize: 16),
-              ),
-
-              const SizedBox(height: 24),
-
-              // View Applications Button
-              Center(
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryTeal,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.pushNamed(
-                      context,
-                      RouteHelper.jobApplication,
-                      arguments: job.id,
-                    );
-                  },
-                  icon: const Icon(Icons.people),
-                  label: const Text(
-                    "View Applications",
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+        ],
       ),
     );
   }
 
-  // Small helper widget for info rows
-  Widget _infoRow(String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: RichText(
-        text: TextSpan(
-          text: "$title: ",
-          style: const TextStyle(
-              fontWeight: FontWeight.bold, color: Colors.black, fontSize: 16),
-          children: [
-            TextSpan(
-              text: value,
-              style: TextStyle(
-                  fontWeight: FontWeight.normal,
-                  color: Colors.grey.shade800,
-                  fontSize: 16),
-            ),
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(16, 50, 20, 30),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Color(0xFF081A2F),
+            Color(0xFF0E2A47),
           ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(38),
+          bottomRight: Radius.circular(38),
+        ),
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.white.withOpacity(0.14),
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: const Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+            ),
+          ),
+
+          const SizedBox(width: 8),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Job Details",
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  ),
+                ),
+
+                const SizedBox(height: 4),
+
+                Text(
+                  job.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 21,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          CircleAvatar(
+            backgroundColor: Colors.white.withOpacity(0.14),
+            child: const Icon(
+              Icons.work_outline,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _detailsCard(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 26,
+                backgroundColor: primaryTeal.withOpacity(0.15),
+                child: const Icon(
+                  Icons.business_center,
+                  color: primaryTeal,
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
+              Expanded(
+                child: Text(
+                  job.title,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF081A2F),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 18),
+
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              if (job.department.isNotEmpty)
+                _chip(
+                  Icons.apartment,
+                  job.department,
+                  const Color(0xFF4A90E2),
+                ),
+
+              if (job.salary.isNotEmpty)
+                _chip(
+                  Icons.payments,
+                  job.salary,
+                  Colors.green,
+                ),
+
+              _chip(
+                Icons.calendar_month,
+                job.deadline.toLocal().toString().split(' ')[0],
+                Colors.orange,
+              ),
+
+              _chip(
+                Icons.access_time,
+                job.createdAt.toLocal().toString().split(' ')[0],
+                Colors.purple,
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 24),
+
+          const Text(
+            "Job Description",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+              color: Color(0xFF081A2F),
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          Text(
+            job.description,
+            style: TextStyle(
+              color: Colors.grey.shade700,
+              fontSize: 16,
+              height: 1.6,
+            ),
+          ),
+
+          const SizedBox(height: 28),
+
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryTeal,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(
+                  vertical: 15,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              onPressed: () {
+                Navigator.pushNamed(
+                  context,
+                  RouteHelper.jobApplication,
+                  arguments: job.id,
+                );
+              },
+              icon: const Icon(Icons.people_outline),
+              label: const Text(
+                "View Applications",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _chip(
+      IconData icon,
+      String text,
+      Color color,
+      ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 10,
+        vertical: 7,
+      ),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 14,
+            color: color,
+          ),
+          const SizedBox(width: 5),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 12,
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }

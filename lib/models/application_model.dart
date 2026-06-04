@@ -27,7 +27,7 @@ class ApplicationModel {
     required this.status,
   });
 
-  // Factory constructor to create ApplicationModel from Firestore data
+
   factory ApplicationModel.fromMap(Map<String, dynamic> map, String id) {
     return ApplicationModel(
       id: id,
@@ -45,7 +45,7 @@ class ApplicationModel {
     );
   }
 
-  // Convert ApplicationModel to Map (for saving to Firestore)
+
   Map<String, dynamic> toMap() {
     return {
       'jobId': jobId,

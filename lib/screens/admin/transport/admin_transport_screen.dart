@@ -9,208 +9,323 @@ import 'update_transport_screen.dart';
 import 'transport_details_screen.dart';
 
 const Color primaryTeal = Color(0xFF3CC6C6);
-const Color scaffoldBg = Color(0xFFF5F5F5);
+const Color darkNavy = Color(0xFF081A2F);
+const Color navy = Color(0xFF0E2A47);
+const Color bgColor = Color(0xFFF8F9FB);
 
 class AdminTransportScreen extends StatelessWidget {
   const AdminTransportScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser!;
-    final provider = Provider.of<TransportProvider>(context, listen: true);
+    final provider = Provider.of<TransportProvider>(context);
+    final currentAdminId = FirebaseAuth.instance.currentUser!.uid;
 
     return Scaffold(
-      backgroundColor: scaffoldBg,
-      appBar: AppBar(
-        title: const Text(
-          'My Transport Jobs',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: primaryTeal,
-      ),
-      body: StreamBuilder<List<TransportModel>>(
-        stream: provider.getAdminTransportJobs(user.uid),
-        builder: (context, snapshot) {
-          // Loading state
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          // Error state
-          if (snapshot.hasError) {
-            return Center(
-              child: Text(
-                'Error loading transport jobs: ${snapshot.error}',
-                style: const TextStyle(color: Colors.red),
-              ),
-            );
-          }
-
-          final jobs = snapshot.data ?? [];
-
-          // Empty state
-          if (jobs.isEmpty) {
-            return const Center(
-              child: Text('No transport jobs posted yet.'),
-            );
-          }
-
-          // Jobs list
-          return ListView.builder(
-            padding: const EdgeInsets.all(12),
-            itemCount: jobs.length,
-            itemBuilder: (context, index) {
-              final job = jobs[index];
-
-              return Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 6,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Job Title
-                    Text(
-                      job.title,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 18),
-                    ),
-                    const SizedBox(height: 6),
-
-                    // Job Description
-                    Text(
-                      job.description,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: Colors.grey.shade700),
-                    ),
-                    const SizedBox(height: 8),
-
-                    // Route & Salary
-                    if (job.route.isNotEmpty) Text('Route: ${job.route}'),
-                    if (job.salary.isNotEmpty) Text('Salary: ${job.salary}'),
-                    const SizedBox(height: 4),
-
-                    // Posted date
-                    Text(
-                        'Posted on: ${job.createdAt.toLocal().toString().split(' ')[0]}'),
-                    const SizedBox(height: 12),
-
-                    // Buttons Row
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        // Details Button
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primaryTeal,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)),
-                          ),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) =>
-                                      TransportDetailScreen(job: job)),
-                            );
-                          },
-                          child: const Text('Details'),
-                        ),
-                        const SizedBox(width: 8),
-
-                        // Update Button
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)),
-                          ),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) =>
-                                      UpdateTransportScreen(job: job)),
-                            );
-                          },
-                          child: const Text('Update'),
-                        ),
-                        const SizedBox(width: 8),
-
-                        // Delete Button
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)),
-                          ),
-                          onPressed: () async {
-                            bool confirmed = await showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: const Text('Confirm Delete'),
-                                content: const Text(
-                                    'Are you sure you want to delete this transport job?'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.pop(context, false),
-                                    child: const Text('Cancel'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.pop(context, true),
-                                    child: const Text('Delete',
-                                        style: TextStyle(color: Colors.red)),
-                                  ),
-                                ],
-                              ),
-                            );
-
-                            if (confirmed) {
-                              await provider.deleteTransportJob(job.id);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text(
-                                        'Transport job deleted successfully')),
-                              );
-                            }
-                          },
-                          child: const Text('Delete'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        },
-      ),
-
+      backgroundColor: bgColor,
       floatingActionButton: FloatingActionButton(
         backgroundColor: primaryTeal,
-        child: const Icon(Icons.add),
+        elevation: 6,
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const PostTransportScreen()),
           );
         },
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
+      body: Column(
+        children: [
+          _buildHeader(),
+          Expanded(
+            child: StreamBuilder<List<TransportModel>>(
+              stream: provider.getAdminTransportJobs(currentAdminId),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text(
+                      "Error: ${snapshot.error}",
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  );
+                }
+
+                final jobs = snapshot.data ?? [];
+
+                if (jobs.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      "No transport jobs posted yet",
+                      style: TextStyle(fontSize: 16, color: Colors.black54),
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: jobs.length,
+                  itemBuilder: (context, index) {
+                    final job = jobs[index];
+                    return _transportCard(context, job, provider);
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 55, 20, 30),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [darkNavy, navy],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(38),
+          bottomRight: Radius.circular(38),
+        ),
+      ),
+      child: const Row(
+        children: [
+          CircleAvatar(
+            radius: 26,
+            backgroundColor: Colors.white24,
+            child: Icon(Icons.directions_bus, color: Colors.white),
+          ),
+          SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Transport Admin",
+                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  "Manage Transport Jobs",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          CircleAvatar(
+            backgroundColor: Colors.white24,
+            child: Icon(Icons.notifications_none, color: Colors.white),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _transportCard(
+      BuildContext context,
+      TransportModel job,
+      TransportProvider provider,
+      ) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: primaryTeal.withOpacity(0.15),
+                child: const Icon(Icons.directions_bus, color: primaryTeal),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  job.title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: darkNavy,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            job.description,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: Colors.grey.shade700,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              if (job.route.isNotEmpty)
+                _chip(Icons.route, job.route, const Color(0xFF4A90E2)),
+              if (job.salary.isNotEmpty)
+                _chip(Icons.payments, job.salary, Colors.green),
+              _chip(
+                Icons.calendar_month,
+                job.createdAt.toLocal().toString().split(' ')[0],
+                Colors.orange,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _button(
+                  "Details",
+                  primaryTeal,
+                  Icons.visibility,
+                      () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => TransportDetailScreen(job: job),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _button(
+                  "Update",
+                  Colors.orange,
+                  Icons.edit,
+                      () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => UpdateTransportScreen(job: job),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _button(
+                  "Delete",
+                  Colors.red,
+                  Icons.delete,
+                      () async {
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: const Text("Delete Transport Job"),
+                        content: const Text("Are you sure?"),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: const Text("Cancel"),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: const Text(
+                              "Delete",
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (confirm == true) {
+                      await provider.deleteTransportJob(job.id);
+
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Transport job deleted successfully"),
+                          ),
+                        );
+                      }
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _chip(IconData icon, String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 5),
+          Text(
+            text,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _button(
+      String title,
+      Color color,
+      IconData icon,
+      VoidCallback onTap,
+      ) {
+    return ElevatedButton.icon(
+      onPressed: onTap,
+      icon: Icon(icon, size: 16),
+      label: Text(title),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
       ),
     );
   }
