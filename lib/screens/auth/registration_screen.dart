@@ -57,7 +57,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                 const SizedBox(height: 35),
 
-                // 👤 Full Name
+
                 _buildLabel("Full Name"),
                 const SizedBox(height: 8),
                 TextFormField(
@@ -68,7 +68,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                 const SizedBox(height: 20),
 
-                // 📧 Email
+
                 _buildLabel("Email Address"),
                 const SizedBox(height: 8),
                 TextFormField(
@@ -80,7 +80,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                 const SizedBox(height: 20),
 
-                // 📞 Phone
+
                 _buildLabel("Phone Number"),
                 const SizedBox(height: 8),
                 TextFormField(
@@ -92,7 +92,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                 const SizedBox(height: 20),
 
-                // 🔒 Password
+
                 _buildLabel("Password"),
                 const SizedBox(height: 8),
                 TextFormField(
@@ -104,7 +104,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                 const SizedBox(height: 35),
 
-                // 🚀 Register Button
+
                 Consumer<MyAuthProvider>(
                   builder: (context, provider, child) {
                     return provider.loading
@@ -145,7 +145,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                 const SizedBox(height: 25),
 
-                // 🔗 Back to Login
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -174,7 +174,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     );
   }
 
-  // --- UI Helpers for Consistency ---
+
 
   Widget _buildLabel(String text) {
     return Text(

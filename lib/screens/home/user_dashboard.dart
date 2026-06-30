@@ -20,14 +20,23 @@ class UserDashboard extends StatelessWidget {
   Future<String> _getUserName() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return "Oyon";
-    final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
     return doc.data()?['name'] ?? "Oyon";
   }
 
   Future<Map<String, int>> _getTotalCounts() async {
-    final jobsSnapshot = await FirebaseFirestore.instance.collection('jobs').get();
-    final transportSnapshot = await FirebaseFirestore.instance.collection('transport_jobs').get();
-    final eventsSnapshot = await FirebaseFirestore.instance.collection('events').get();
+    final jobsSnapshot = await FirebaseFirestore.instance
+        .collection('jobs')
+        .get();
+    final transportSnapshot = await FirebaseFirestore.instance
+        .collection('transport_jobs')
+        .get();
+    final eventsSnapshot = await FirebaseFirestore.instance
+        .collection('events')
+        .get();
 
     return {
       'Jobs': jobsSnapshot.size,
@@ -36,7 +45,6 @@ class UserDashboard extends StatelessWidget {
     };
   }
 
-  // ================= HEADER =================
   Widget _buildDashboardHeader() {
     return Container(
       width: double.infinity,
@@ -73,9 +81,21 @@ class UserDashboard extends StatelessWidget {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text("Welcome back,", style: TextStyle(color: Colors.white70, fontSize: 14)),
-                            Text("${snapshot.data ?? "Oyon"}.",
-                                style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                            const Text(
+                              "Welcome back,",
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                              ),
+                            ),
+                            Text(
+                              "${snapshot.data ?? "Oyon"}.",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ],
                         );
                       },
@@ -83,7 +103,10 @@ class UserDashboard extends StatelessWidget {
                   ),
                   CircleAvatar(
                     backgroundColor: Colors.white.withOpacity(0.1),
-                    child: const Icon(Icons.notifications_none, color: Colors.white),
+                    child: const Icon(
+                      Icons.notifications_none,
+                      color: Colors.white,
+                    ),
                   ),
                 ],
               ),
@@ -108,35 +131,33 @@ class UserDashboard extends StatelessWidget {
           children: [
             _buildDashboardHeader(),
 
-            const SizedBox(height: 24), // Gap between header and categories
-
-            // ================= FIXED CATEGORY ROW =================
+            const SizedBox(height: 24),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
                   _buildCategoryCard(
-                      context,
-                      title: "Jobs",
-                      icon: Icons.business_center,
-                      color: const Color(0xFF4A90E2),
-                      screen: const JobsScreen()
+                    context,
+                    title: "Jobs",
+                    icon: Icons.business_center,
+                    color: const Color(0xFF4A90E2),
+                    screen: const JobsScreen(),
                   ),
                   const SizedBox(width: 12),
                   _buildCategoryCard(
-                      context,
-                      title: "Transport",
-                      icon: Icons.local_shipping,
-                      color: const Color(0xFFF5A623),
-                      screen: const TransportJobScreen()
+                    context,
+                    title: "Transport",
+                    icon: Icons.local_shipping,
+                    color: const Color(0xFFF5A623),
+                    screen: const TransportJobScreen(),
                   ),
                   const SizedBox(width: 12),
                   _buildCategoryCard(
-                      context,
-                      title: "Events",
-                      icon: Icons.calendar_today,
-                      color: const Color(0xFFF05A94),
-                      screen: const EventsListScreen()
+                    context,
+                    title: "Events",
+                    icon: Icons.calendar_today,
+                    color: const Color(0xFFF05A94),
+                    screen: const EventsListScreen(),
                   ),
                 ],
               ),
@@ -173,11 +194,17 @@ class UserDashboard extends StatelessWidget {
     );
   }
 
-  // Helper method for the fixed cards
-  Widget _buildCategoryCard(BuildContext context, {required String title, required IconData icon, required Color color, required Widget screen}) {
+  Widget _buildCategoryCard(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required Color color,
+    required Widget screen,
+  }) {
     return Expanded(
       child: GestureDetector(
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => screen)),
+        onTap: () =>
+            Navigator.push(context, MaterialPageRoute(builder: (_) => screen)),
         child: Container(
           height: 120,
           decoration: BoxDecoration(
@@ -205,7 +232,11 @@ class UserDashboard extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 title,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
               ),
             ],
           ),
@@ -222,32 +253,63 @@ class UserDashboard extends StatelessWidget {
         final data = snapshot.data!;
         return Container(
           padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
           child: Row(
             children: [
               Expanded(
                 child: Column(
                   children: [
-                    _legendItem(const Color(0xFF4A90E2), data['Jobs'].toString(), "JOBS FOUND"),
-                    _legendItem(const Color(0xFFF5A623), data['Transport'].toString(), "TRIPS AVAILABLE"),
-                    _legendItem(const Color(0xFFF05A94), data['Events'].toString(), "EVENTS LIVE"),
+                    _legendItem(
+                      const Color(0xFF4A90E2),
+                      data['Jobs'].toString(),
+                      "JOBS FOUND",
+                    ),
+                    _legendItem(
+                      const Color(0xFFF5A623),
+                      data['Transport'].toString(),
+                      "TRIPS AVAILABLE",
+                    ),
+                    _legendItem(
+                      const Color(0xFFF05A94),
+                      data['Events'].toString(),
+                      "EVENTS LIVE",
+                    ),
                   ],
                 ),
               ),
               SizedBox(
-                height: 100, width: 100,
+                height: 100,
+                width: 100,
                 child: PieChart(
                   PieChartData(
                     sectionsSpace: 0,
                     centerSpaceRadius: 30,
                     sections: [
-                      PieChartSectionData(value: 33, color: const Color(0xFF4A90E2), radius: 15, showTitle: false),
-                      PieChartSectionData(value: 33, color: const Color(0xFFF5A623), radius: 15, showTitle: false),
-                      PieChartSectionData(value: 33, color: const Color(0xFFF05A94), radius: 15, showTitle: false),
+                      PieChartSectionData(
+                        value: 33,
+                        color: const Color(0xFF4A90E2),
+                        radius: 15,
+                        showTitle: false,
+                      ),
+                      PieChartSectionData(
+                        value: 33,
+                        color: const Color(0xFFF5A623),
+                        radius: 15,
+                        showTitle: false,
+                      ),
+                      PieChartSectionData(
+                        value: 33,
+                        color: const Color(0xFFF05A94),
+                        radius: 15,
+                        showTitle: false,
+                      ),
                     ],
                   ),
                 ),
-              )
+              ),
             ],
           ),
         );
@@ -265,10 +327,19 @@ class UserDashboard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(val.padLeft(2, '0'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-              Text(label, style: const TextStyle(fontSize: 8, color: Colors.grey)),
+              Text(
+                val.padLeft(2, '0'),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+              Text(
+                label,
+                style: const TextStyle(fontSize: 8, color: Colors.grey),
+              ),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -277,25 +348,36 @@ class UserDashboard extends StatelessWidget {
 
 class SectionTitle extends StatelessWidget {
   final String title;
+
   const SectionTitle({super.key, required this.title});
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+      child: Text(
+        title,
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
     );
   }
 }
 
-// ================= LIST VIEWS (MODIFIED FOR CLEANER UI) =================
+
 class JobsList extends StatelessWidget {
   const JobsList({super.key});
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('jobs').orderBy('createdAt', descending: true).limit(3).snapshots(),
+      stream: FirebaseFirestore.instance
+          .collection('jobs')
+          .orderBy('createdAt', descending: true)
+          .limit(3)
+          .snapshots(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+        if (!snapshot.hasData)
+          return const Center(child: CircularProgressIndicator());
         final docs = snapshot.data!.docs;
         return ListView.builder(
           shrinkWrap: true,
@@ -303,7 +385,12 @@ class JobsList extends StatelessWidget {
           itemCount: docs.length,
           itemBuilder: (context, index) => Padding(
             padding: const EdgeInsets.only(bottom: 10),
-            child: JobCard(job: JobModel.fromMap(docs[index].data() as Map<String, dynamic>, docs[index].id)),
+            child: JobCard(
+              job: JobModel.fromMap(
+                docs[index].data() as Map<String, dynamic>,
+                docs[index].id,
+              ),
+            ),
           ),
         );
       },
@@ -313,10 +400,15 @@ class JobsList extends StatelessWidget {
 
 class TransportJobsList extends StatelessWidget {
   const TransportJobsList({super.key});
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('transport_jobs').orderBy('createdAt', descending: true).limit(3).snapshots(),
+      stream: FirebaseFirestore.instance
+          .collection('transport_jobs')
+          .orderBy('createdAt', descending: true)
+          .limit(3)
+          .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const SizedBox();
         final docs = snapshot.data!.docs;
@@ -326,7 +418,12 @@ class TransportJobsList extends StatelessWidget {
           itemCount: docs.length,
           itemBuilder: (context, index) => Padding(
             padding: const EdgeInsets.only(bottom: 10),
-            child: TransportCard(transport: TransportModel.fromMap(docs[index].data() as Map<String, dynamic>, docs[index].id)),
+            child: TransportCard(
+              transport: TransportModel.fromMap(
+                docs[index].data() as Map<String, dynamic>,
+                docs[index].id,
+              ),
+            ),
           ),
         );
       },
@@ -336,10 +433,15 @@ class TransportJobsList extends StatelessWidget {
 
 class EventsList extends StatelessWidget {
   const EventsList({super.key});
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('events').orderBy('createdAt', descending: true).limit(3).snapshots(),
+      stream: FirebaseFirestore.instance
+          .collection('events')
+          .orderBy('createdAt', descending: true)
+          .limit(3)
+          .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const SizedBox();
         final docs = snapshot.data!.docs;
@@ -349,7 +451,12 @@ class EventsList extends StatelessWidget {
           itemCount: docs.length,
           itemBuilder: (context, index) => Padding(
             padding: const EdgeInsets.only(bottom: 10),
-            child: EventCard(event: EventModel.fromMap({...docs[index].data() as Map<String, dynamic>, 'id': docs[index].id})),
+            child: EventCard(
+              event: EventModel.fromMap({
+                ...docs[index].data() as Map<String, dynamic>,
+                'id': docs[index].id,
+              }),
+            ),
           ),
         );
       },

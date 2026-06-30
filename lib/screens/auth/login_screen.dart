@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:job_portal/providers/auth_provider/my_auth_provider.dart';
+import 'package:job_portal/screens/auth/forget_password_screen.dart';
 import 'package:provider/provider.dart';
 import '../../utils/route_helper.dart';
 
@@ -28,7 +29,7 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 50),
-                // 🎓 DIU Branding Section
+
                 Center(
                   child: Column(
                     children: [
@@ -39,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           shape: BoxShape.circle,
                         ),
                         child: Image.asset(
-                          'assets/images/diu_logo.jpg', // Using consistent logo
+                          'assets/images/diu_logo.jpg',
                           height: 80,
                         ),
                       ),
@@ -66,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 50),
 
-                // 📧 Email Field
+
                 _buildLabel("Email Address"),
                 const SizedBox(height: 8),
                 TextFormField(
@@ -81,7 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 24),
 
-                // 🔒 Password Field
+
                 _buildLabel("Password"),
                 const SizedBox(height: 8),
                 TextFormField(
@@ -94,11 +95,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   validator: (val) => val!.isEmpty ? "Please enter password" : null,
                 ),
 
-                // 🔑 Forgot Password
+
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ForgotPasswordScreen(),
+                        ),
+                      );
+                    },
                     child: const Text(
                       "Forgot Password?",
                       style: TextStyle(color: Color(0xFF4A90E2), fontWeight: FontWeight.w600),
@@ -108,7 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 30),
 
-                // 🚀 Login Button
+
                 Consumer<MyAuthProvider>(
                   builder: (context, provider, child) {
                     return provider.loading
@@ -144,7 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 40),
 
-                // 📝 Sign Up Footer
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -172,7 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // Helper for Input Labels
+
   Widget _buildLabel(String text) {
     return Text(
       text,
@@ -184,7 +192,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // Helper for consistent Input Decoration
+
   InputDecoration _inputDecoration({required String hint, required IconData icon}) {
     return InputDecoration(
       hintText: hint,

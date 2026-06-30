@@ -7,11 +7,11 @@ Future<void> sendEmailJS({
   required String jobTitle,
   required String status,
 }) async {
-  final serviceId = 'service_p5oftvq';   // EmailJS service ID
+  final serviceId = 'service_p5oftvq';
   final templateId = status == 'accepted'
       ? 'template_lfzzncx'
-      : 'template_1xw74eq';         // EmailJS template ID
-  final userId = 'vmX9YYo3sye5bIv8w';         // EmailJS public key
+      : 'template_1xw74eq';
+  final userId = 'vmX9YYo3sye5bIv8w';
 
   final url = Uri.parse('https://api.emailjs.com/api/v1.0/email/send');
 

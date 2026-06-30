@@ -37,12 +37,12 @@ class _MyProfileState extends State<MyProfile> {
     }
 
     try {
-      // Fetch user document safely
+
       final userDoc = await authProvider.db.collection('users').doc(uid).get();
       if (userDoc.exists) {
         final data = userDoc.data()!;
 
-        // Provide defaults if fields missing
+
         final safeData = {
           'uid': data['uid'] ?? uid,
           'name': data['name'] ?? "Student",
@@ -152,7 +152,7 @@ class _MyProfileState extends State<MyProfile> {
   Widget _buildHeader() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.only(bottom: 20, top: 15), // smaller padding
+      padding: const EdgeInsets.only(bottom: 20, top: 15),
       decoration: const BoxDecoration(
         color: Color(0xFF081A2F),
         borderRadius: BorderRadius.only(

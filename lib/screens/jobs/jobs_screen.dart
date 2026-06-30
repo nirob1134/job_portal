@@ -22,7 +22,7 @@ class _JobsScreenState extends State<JobsScreen> {
     final jobProvider = Provider.of<JobProvider>(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F7FA), // Soft grey background
+      backgroundColor: const Color(0xFFF4F7FA),
       appBar: AppBar(
         elevation: 0,
         backgroundColor: const Color(0xFF081A2F),
@@ -32,7 +32,7 @@ class _JobsScreenState extends State<JobsScreen> {
       ),
       body: Column(
         children: [
-          // THE PERFECT SEARCH BAR (Back by popular demand)
+
           Container(
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 25),
             decoration: const BoxDecoration(

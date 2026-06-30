@@ -15,7 +15,7 @@ class ApplyJobFormScreen extends StatefulWidget {
 class _ApplyJobFormScreenState extends State<ApplyJobFormScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers
+
   final _idController = TextEditingController();
   final _semesterController = TextEditingController();
   final _cgpaController = TextEditingController();
@@ -31,7 +31,6 @@ class _ApplyJobFormScreenState extends State<ApplyJobFormScreen> {
     try {
       final user = FirebaseAuth.instance.currentUser!;
 
-      // Fetch user's basic name/email from the 'users' collection
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
@@ -68,7 +67,7 @@ class _ApplyJobFormScreenState extends State<ApplyJobFormScreen> {
         'studentId': _idController.text.trim(),
         'semester': _semesterController.text.trim(),
         'cgpa': _cgpaController.text.trim(),
-        'resumeLink': _resumeController.text.trim(), // Modern Link field
+        'resumeLink': _resumeController.text.trim(),
         'status': 'pending',
         'appliedAt': FieldValue.serverTimestamp(),
       });
@@ -101,8 +100,8 @@ class _ApplyJobFormScreenState extends State<ApplyJobFormScreen> {
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.pop(context); // Close dialog
-              Navigator.pop(context); // Back to details
+              Navigator.pop(context);
+              Navigator.pop(context);
             },
             child: const Text("Done", style: TextStyle(fontWeight: FontWeight.bold)),
           )

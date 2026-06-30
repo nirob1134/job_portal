@@ -29,6 +29,11 @@ class MyAuthProvider with ChangeNotifier {
       String phone,
       ) async {
 
+    if (!email.trim().toLowerCase().endsWith('@diu.edu.bd')) {
+      showMsg('Only DIU student email addresses are allowed.');
+      return;
+    }
+
     _loading(true);
 
     try {
@@ -115,17 +120,23 @@ class MyAuthProvider with ChangeNotifier {
 
 
   Future<void> forgotPassword(String email) async {
+    _loading(true);
 
     try {
-
       await auth.sendPasswordResetEmail(
         email: email.trim(),
       );
+      print("Reset email sent");
 
-      showMsg("Password reset link sent to your email");
-
-    } on FirebaseAuthException catch(e){
-      showMsg(e.message ?? "Error sending email");
+      showMsg(
+        "Password reset link has been sent to your email.",
+      );
+    } on FirebaseAuthException catch (e) {
+      showMsg(e.message ?? "Failed to send reset email");
+    } catch (e) {
+      showMsg(e.toString());
+    } finally {
+      _loading(false);
     }
   }
 
