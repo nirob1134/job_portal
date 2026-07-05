@@ -70,7 +70,8 @@ class ListOfAppliedJobScreen extends StatelessWidget {
                 itemCount: applications.length,
                 itemBuilder: (context, index) {
                   final app = applications[index];
-                  // Find job details or use fallback
+
+                  // Find job details or use fallback containing the required new parameters
                   final job = jobs.firstWhere(
                         (j) => j.id == app.jobId,
                     orElse: () => JobModel(
@@ -82,6 +83,10 @@ class ListOfAppliedJobScreen extends StatelessWidget {
                       deadline: DateTime.now(),
                       createdAt: DateTime.now(),
                       adminId: '',
+                      workType: 'Part-Time',
+                      requirements: [],
+                      status: 'closed',
+                      vacancy: 0,
                     ),
                   );
 
@@ -170,8 +175,18 @@ class ListOfAppliedJobScreen extends StatelessWidget {
                       ],
                     ),
 
+                    const SizedBox(height: 10),
+
+                    // --- Visual Badges for Work Type and Location ---
+                    Row(
+                      children: [
+                        _buildTag(job.workType, const Color(0xFF3CC6C6)),
+                        const SizedBox(width: 8),
+                      ],
+                    ),
+
                     const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12),
+                      padding: EdgeInsets.symmetric(vertical: 10),
                       child: Divider(height: 1),
                     ),
 
@@ -231,6 +246,24 @@ class ListOfAppliedJobScreen extends StatelessWidget {
       child: Text(
         status.toUpperCase(),
         style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+      ),
+    );
+  }
+
+  Widget _buildTag(String label, Color themeColor) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: themeColor.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: themeColor,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

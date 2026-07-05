@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../models/application_model.dart';
 import '../../utils/emailSender.dart';
@@ -13,6 +14,31 @@ class JobApplicationsScreen extends StatelessWidget {
     super.key,
     required this.jobId,
   });
+
+  // Safe launcher helper for web URLs
+  Future<void> _launchURL(BuildContext context, String urlString) async {
+    final cleanUrl = urlString.trim();
+    if (cleanUrl.isEmpty) return;
+
+    final Uri url = Uri.parse(cleanUrl);
+
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        throw 'Could not launch $cleanUrl';
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not open link. Invalid URL format.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +69,15 @@ class JobApplicationsScreen extends StatelessWidget {
 
                 final applications = snapshot.data!.docs.map((doc) {
                   final data = doc.data() as Map<String, dynamic>;
+
+                  // Dynamic key matching logic
+                  if (data['semester'] != null && data['runningSemester'] == null) {
+                    data['runningSemester'] = data['semester'];
+                  }
+                  if (data['resumeLink'] != null && data['coverLetter'] == null) {
+                    data['coverLetter'] = data['resumeLink'];
+                  }
+
                   return ApplicationModel.fromMap(data, doc.id);
                 }).toList();
 
@@ -106,7 +141,7 @@ class JobApplicationsScreen extends StatelessWidget {
               ],
             ),
           ),
-          CircleAvatar(
+          const CircleAvatar(
             backgroundColor: Colors.white24,
             child: Icon(Icons.people_outline, color: Colors.white),
           ),
@@ -116,6 +151,8 @@ class JobApplicationsScreen extends StatelessWidget {
   }
 
   Widget _applicationCard(BuildContext context, ApplicationModel app) {
+    final bool hasLink = app.coverLetter.trim().isNotEmpty;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
@@ -161,7 +198,7 @@ class JobApplicationsScreen extends StatelessWidget {
           const SizedBox(height: 14),
 
           const Text(
-            "Cover Letter",
+            "Resume / Portfolio Link",
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 16,
@@ -171,18 +208,35 @@ class JobApplicationsScreen extends StatelessWidget {
 
           const SizedBox(height: 6),
 
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8F9FB),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Text(
-              app.coverLetter,
-              style: TextStyle(
-                color: Colors.grey.shade700,
-                height: 1.5,
+          // Clickable Link Container
+          GestureDetector(
+            onTap: hasLink ? () => _launchURL(context, app.coverLetter) : null,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: hasLink ? const Color(0xFF4A90E2).withOpacity(0.05) : const Color(0xFFF8F9FB),
+                borderRadius: BorderRadius.circular(14),
+                border: hasLink ? Border.all(color: const Color(0xFF4A90E2).withOpacity(0.2), width: 1) : null,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      hasLink ? app.coverLetter : "No link provided",
+                      style: TextStyle(
+                        color: hasLink ? const Color(0xFF4A90E2) : Colors.grey.shade500,
+                        fontWeight: hasLink ? FontWeight.w500 : FontWeight.normal,
+                        decoration: hasLink ? TextDecoration.underline : TextDecoration.none,
+                        height: 1.5,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (hasLink)
+                    const Icon(Icons.open_in_new_rounded, size: 16, color: Color(0xFF4A90E2)),
+                ],
               ),
             ),
           ),
@@ -248,7 +302,7 @@ class JobApplicationsScreen extends StatelessWidget {
           ),
           Expanded(
             child: Text(
-              value,
+              value.isNotEmpty ? value : "N/A",
               style: TextStyle(color: Colors.grey.shade700),
             ),
           ),
@@ -325,6 +379,7 @@ class JobApplicationsScreen extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Application $status & email sent!'),
+            backgroundColor: status == 'accepted' ? Colors.green : Colors.red,
           ),
         );
       }
@@ -335,6 +390,7 @@ class JobApplicationsScreen extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Failed to update status/email'),
+            backgroundColor: Colors.red,
           ),
         );
       }

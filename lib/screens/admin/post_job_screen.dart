@@ -21,6 +21,14 @@ class _PostJobScreenState extends State<PostJobScreen> {
   final dept = TextEditingController();
   final salary = TextEditingController();
 
+  // Controllers
+  final vacancy = TextEditingController(text: "1");
+  final requirements = TextEditingController();
+
+  // Dropdown States
+  String selectedWorkType = "Part-Time";
+  String selectedStatus = "active";
+
   DateTime? deadline;
   bool loading = false;
 
@@ -30,6 +38,8 @@ class _PostJobScreenState extends State<PostJobScreen> {
     desc.dispose();
     dept.dispose();
     salary.dispose();
+    vacancy.dispose();
+    requirements.dispose();
     super.dispose();
   }
 
@@ -55,6 +65,12 @@ class _PostJobScreenState extends State<PostJobScreen> {
       loading = true;
     });
 
+    List<String> requirementsList = requirements.text
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+
     final job = JobModel(
       id: '',
       title: title.text.trim(),
@@ -64,6 +80,10 @@ class _PostJobScreenState extends State<PostJobScreen> {
       deadline: deadline ?? DateTime.now().add(const Duration(days: 30)),
       createdAt: DateTime.now(),
       adminId: '',
+      workType: selectedWorkType,
+      requirements: requirementsList,
+      status: selectedStatus,
+      vacancy: int.tryParse(vacancy.text.trim()) ?? 1,
     );
 
     await context.read<JobProvider>().postJob(job);
@@ -72,7 +92,6 @@ class _PostJobScreenState extends State<PostJobScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Job posted successfully")),
       );
-
       Navigator.pop(context);
     }
 
@@ -88,12 +107,11 @@ class _PostJobScreenState extends State<PostJobScreen> {
       body: Column(
         children: [
           _buildHeader(context),
-
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
               child: Container(
-                padding: const EdgeInsets.all(18),
+                padding: const EdgeInsets.all(20),
                 decoration: _cardDecoration(),
                 child: Form(
                   key: _formKey,
@@ -105,7 +123,7 @@ class _PostJobScreenState extends State<PostJobScreen> {
                         icon: Icons.work_outline,
                       ),
 
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
 
                       _buildField(
                         controller: desc,
@@ -114,7 +132,7 @@ class _PostJobScreenState extends State<PostJobScreen> {
                         maxLines: 4,
                       ),
 
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
 
                       _buildField(
                         controller: dept,
@@ -122,22 +140,70 @@ class _PostJobScreenState extends State<PostJobScreen> {
                         icon: Icons.apartment,
                       ),
 
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
 
                       _buildField(
                         controller: salary,
-                        label: "Salary",
+                        label: "Salary / Remuneration",
                         icon: Icons.payments_outlined,
                       ),
 
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
+
+                      // Full-width Work Type Dropdown
+                      _buildDropdown(
+                        icon: Icons.schedule,
+                        value: selectedWorkType,
+                        items: ["Part-Time", "Full-Time", "Internship"],
+                        onChanged: (val) => setState(() => selectedWorkType = val!),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Vacancy Field (Stacked Vertically, No Label Text)
+                      _buildField(
+                        controller: vacancy,
+                        label: "",
+                        icon: Icons.groups_outlined,
+                        keyboardType: TextInputType.number,
+                        hintText: "Number of Vacancies",
+                        validator: (value) {
+                          if (value == null || int.tryParse(value) == null || int.parse(value) <= 0) {
+                            return "Required";
+                          }
+                          return null;
+                        },
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Status Dropdown (Stacked Vertically below Vacancy)
+                      _buildDropdown(
+                        icon: Icons.toggle_on_outlined,
+                        value: selectedStatus,
+                        items: ["active", "closed"],
+                        onChanged: (val) => setState(() => selectedStatus = val!),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      _buildField(
+                        controller: requirements,
+                        label: "Requirements (Comma-separated)",
+                        icon: Icons.fact_check_outlined,
+                        maxLines: 2,
+                        hintText: "e.g., Flutter, Dart, Git, CGPA 3.0+",
+                        isOptional: true,
+                      ),
+
+                      const SizedBox(height: 16),
 
                       GestureDetector(
                         onTap: _pickDeadline,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 15,
+                            horizontal: 16,
+                            vertical: 16,
                           ),
                           decoration: BoxDecoration(
                             color: const Color(0xFFF8F9FB),
@@ -148,19 +214,13 @@ class _PostJobScreenState extends State<PostJobScreen> {
                           ),
                           child: Row(
                             children: [
-                              const Icon(
-                                Icons.calendar_month,
-                                color: primaryTeal,
-                              ),
+                              const Icon(Icons.calendar_month, color: primaryTeal),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
                                   deadline == null
                                       ? "Select Deadline"
-                                      : deadline!
-                                      .toLocal()
-                                      .toString()
-                                      .split(' ')[0],
+                                      : deadline!.toLocal().toString().split(' ')[0],
                                   style: TextStyle(
                                     color: deadline == null
                                         ? Colors.grey.shade600
@@ -169,16 +229,13 @@ class _PostJobScreenState extends State<PostJobScreen> {
                                   ),
                                 ),
                               ),
-                              const Icon(
-                                Icons.arrow_drop_down,
-                                color: Colors.grey,
-                              ),
+                              const Icon(Icons.arrow_drop_down, color: Colors.grey),
                             ],
                           ),
                         ),
                       ),
 
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 28),
 
                       SizedBox(
                         width: double.infinity,
@@ -188,7 +245,7 @@ class _PostJobScreenState extends State<PostJobScreen> {
                             backgroundColor: primaryTeal,
                             foregroundColor: Colors.white,
                             elevation: 0,
-                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
                             ),
@@ -225,7 +282,7 @@ class _PostJobScreenState extends State<PostJobScreen> {
   Widget _buildHeader(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 50, 20, 30),
+      padding: const EdgeInsets.fromLTRB(16, 60, 16, 24),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [Color(0xFF081A2F), Color(0xFF0E2A47)],
@@ -233,8 +290,8 @@ class _PostJobScreenState extends State<PostJobScreen> {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(38),
-          bottomRight: Radius.circular(38),
+          bottomLeft: Radius.circular(32),
+          bottomRight: Radius.circular(32),
         ),
       ),
       child: Row(
@@ -244,16 +301,16 @@ class _PostJobScreenState extends State<PostJobScreen> {
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back, color: Colors.white),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
           const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   "Admin Action",
-                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                  style: TextStyle(color: Colors.white70, fontSize: 13),
                 ),
-                SizedBox(height: 4),
+                SizedBox(height: 2),
                 Text(
                   "Post New Job",
                   style: TextStyle(
@@ -265,7 +322,7 @@ class _PostJobScreenState extends State<PostJobScreen> {
               ],
             ),
           ),
-          CircleAvatar(
+          const CircleAvatar(
             backgroundColor: Colors.white24,
             child: Icon(Icons.add_business, color: Colors.white),
           ),
@@ -279,25 +336,70 @@ class _PostJobScreenState extends State<PostJobScreen> {
     required String label,
     required IconData icon,
     int maxLines = 1,
+    TextInputType keyboardType = TextInputType.text,
+    String? hintText,
+    String? Function(String?)? validator,
+    bool isOptional = false,
   }) {
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
-      validator: (value) {
-        if (value == null || value.trim().isEmpty) {
-          return "$label is required";
+      keyboardType: keyboardType,
+      validator: validator ?? (value) {
+        if (!isOptional && (value == null || value.trim().isEmpty)) {
+          return "This field is required";
         }
         return null;
       },
       decoration: InputDecoration(
         prefixIcon: Icon(icon, color: primaryTeal),
-        labelText: label,
+        labelText: label.isEmpty ? null : label,
+        hintText: hintText,
+        hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
         filled: true,
         fillColor: const Color(0xFFF8F9FB),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 14,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
         ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: Colors.grey.shade200),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: primaryTeal),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDropdown({
+    required IconData icon,
+    required String value,
+    required List<String> items,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return DropdownButtonFormField<String>(
+      value: value,
+      isExpanded: true,
+      items: items.map((String item) {
+        return DropdownMenuItem<String>(
+          value: item,
+          child: Text(
+            item,
+            style: const TextStyle(fontSize: 13, color: Color(0xFF081A2F)),
+            overflow: TextOverflow.ellipsis,
+          ),
+        );
+      }).toList(),
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        prefixIcon: Icon(icon, color: primaryTeal),
+        filled: true,
+        fillColor: const Color(0xFFF8F9FB),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide.none,
@@ -320,8 +422,8 @@ class _PostJobScreenState extends State<PostJobScreen> {
       borderRadius: BorderRadius.circular(22),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.06),
-          blurRadius: 14,
+          color: Colors.black.withOpacity(0.05),
+          blurRadius: 16,
           offset: const Offset(0, 6),
         ),
       ],

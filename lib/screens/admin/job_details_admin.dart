@@ -158,6 +158,7 @@ class JobDetailsAdmin extends StatelessWidget {
 
           const SizedBox(height: 18),
 
+          // Updated Chip wrap metadata structure
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -169,6 +170,13 @@ class JobDetailsAdmin extends StatelessWidget {
                   const Color(0xFF4A90E2),
                 ),
 
+              if (job.workType.isNotEmpty)
+                _chip(
+                  Icons.schedule,
+                  job.workType,
+                  const Color(0xFFE24A8A),
+                ),
+
               if (job.salary.isNotEmpty)
                 _chip(
                   Icons.payments,
@@ -177,15 +185,21 @@ class JobDetailsAdmin extends StatelessWidget {
                 ),
 
               _chip(
-                Icons.calendar_month,
-                job.deadline.toLocal().toString().split(' ')[0],
-                Colors.orange,
+                Icons.groups_outlined,
+                "${job.vacancy} Vacancies",
+                Colors.blueGrey,
               ),
 
               _chip(
-                Icons.access_time,
-                job.createdAt.toLocal().toString().split(' ')[0],
-                Colors.purple,
+                Icons.toggle_on_outlined,
+                job.status.toUpperCase(),
+                job.status == "active" ? Colors.teal : Colors.red,
+              ),
+
+              _chip(
+                Icons.calendar_month,
+                job.deadline.toLocal().toString().split(' ')[0],
+                Colors.orange,
               ),
             ],
           ),
@@ -211,6 +225,47 @@ class JobDetailsAdmin extends StatelessWidget {
               height: 1.6,
             ),
           ),
+
+          // Dynamically displays Requirements array list if populated
+          if (job.requirements.isNotEmpty) ...[
+            const SizedBox(height: 24),
+            const Text(
+              "Requirements",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                color: Color(0xFF081A2F),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Column(
+              children: job.requirements.map((req) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.check_circle_outline,
+                        color: primaryTeal,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          req,
+                          style: TextStyle(
+                            color: Colors.grey.shade700,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
 
           const SizedBox(height: 28),
 

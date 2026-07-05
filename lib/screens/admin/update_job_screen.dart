@@ -25,6 +25,12 @@ class _UpdateJobScreenState extends State<UpdateJobScreen> {
   late TextEditingController _descriptionController;
   late TextEditingController _departmentController;
   late TextEditingController _salaryController;
+  late TextEditingController _vacancyController;
+  late TextEditingController _requirementsController;
+
+  // Dropdown States
+  String _selectedWorkType = "Part-Time";
+  String _selectedStatus = "active";
 
   DateTime? _deadline;
   bool loading = false;
@@ -37,6 +43,13 @@ class _UpdateJobScreenState extends State<UpdateJobScreen> {
     _descriptionController = TextEditingController(text: widget.job.description);
     _departmentController = TextEditingController(text: widget.job.department);
     _salaryController = TextEditingController(text: widget.job.salary);
+    _vacancyController = TextEditingController(text: widget.job.vacancy.toString());
+
+    // Join the requirements list array into a comma-separated text string for editing
+    _requirementsController = TextEditingController(text: widget.job.requirements.join(', '));
+
+    _selectedWorkType = widget.job.workType.isNotEmpty ? widget.job.workType : "Part-Time";
+    _selectedStatus = widget.job.status.isNotEmpty ? widget.job.status : "active";
     _deadline = widget.job.deadline;
   }
 
@@ -46,6 +59,8 @@ class _UpdateJobScreenState extends State<UpdateJobScreen> {
     _descriptionController.dispose();
     _departmentController.dispose();
     _salaryController.dispose();
+    _vacancyController.dispose();
+    _requirementsController.dispose();
     super.dispose();
   }
 
@@ -76,6 +91,13 @@ class _UpdateJobScreenState extends State<UpdateJobScreen> {
       loading = true;
     });
 
+    // Parse text field content back to a string array
+    List<String> requirementsList = _requirementsController.text
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+
     await context.read<JobProvider>().updateJob(
       widget.job.id,
       {
@@ -83,6 +105,10 @@ class _UpdateJobScreenState extends State<UpdateJobScreen> {
         'description': _descriptionController.text.trim(),
         'department': _departmentController.text.trim(),
         'salary': _salaryController.text.trim(),
+        'workType': _selectedWorkType,
+        'vacancy': int.tryParse(_vacancyController.text.trim()) ?? 1,
+        'status': _selectedStatus,
+        'requirements': requirementsList,
         'deadline': _deadline,
       },
     );
@@ -110,9 +136,9 @@ class _UpdateJobScreenState extends State<UpdateJobScreen> {
 
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
               child: Container(
-                padding: const EdgeInsets.all(18),
+                padding: const EdgeInsets.all(20),
                 decoration: _cardDecoration(),
                 child: Form(
                   key: _formKey,
@@ -124,7 +150,7 @@ class _UpdateJobScreenState extends State<UpdateJobScreen> {
                         icon: Icons.work_outline,
                       ),
 
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
 
                       _buildField(
                         controller: _descriptionController,
@@ -133,7 +159,7 @@ class _UpdateJobScreenState extends State<UpdateJobScreen> {
                         maxLines: 4,
                       ),
 
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
 
                       _buildField(
                         controller: _departmentController,
@@ -141,7 +167,7 @@ class _UpdateJobScreenState extends State<UpdateJobScreen> {
                         icon: Icons.apartment,
                       ),
 
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
 
                       _buildField(
                         controller: _salaryController,
@@ -149,14 +175,62 @@ class _UpdateJobScreenState extends State<UpdateJobScreen> {
                         icon: Icons.payments_outlined,
                       ),
 
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
+
+                      // Full-width Work Type Dropdown
+                      _buildDropdown(
+                        icon: Icons.schedule,
+                        value: _selectedWorkType,
+                        items: ["Part-Time", "Full-Time", "Internship"],
+                        onChanged: (val) => setState(() => _selectedWorkType = val!),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Vacancy Field (Stacked Vertically, No Label Text)
+                      _buildField(
+                        controller: _vacancyController,
+                        label: "",
+                        icon: Icons.groups_outlined,
+                        keyboardType: TextInputType.number,
+                        hintText: "Number of Vacancies",
+                        validator: (value) {
+                          if (value == null || int.tryParse(value) == null || int.parse(value) <= 0) {
+                            return "Required";
+                          }
+                          return null;
+                        },
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Status Dropdown (Stacked Vertically below Vacancy)
+                      _buildDropdown(
+                        icon: Icons.toggle_on_outlined,
+                        value: _selectedStatus,
+                        items: ["active", "closed"],
+                        onChanged: (val) => setState(() => _selectedStatus = val!),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      _buildField(
+                        controller: _requirementsController,
+                        label: "Requirements (Comma-separated)",
+                        icon: Icons.fact_check_outlined,
+                        maxLines: 2,
+                        hintText: "e.g., Flutter, Dart, Git, CGPA 3.0+",
+                        isOptional: true,
+                      ),
+
+                      const SizedBox(height: 16),
 
                       GestureDetector(
                         onTap: _pickDeadline,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 15,
+                            horizontal: 16,
+                            vertical: 16,
                           ),
                           decoration: BoxDecoration(
                             color: const Color(0xFFF8F9FB),
@@ -197,7 +271,7 @@ class _UpdateJobScreenState extends State<UpdateJobScreen> {
                         ),
                       ),
 
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 28),
 
                       SizedBox(
                         width: double.infinity,
@@ -207,7 +281,7 @@ class _UpdateJobScreenState extends State<UpdateJobScreen> {
                             backgroundColor: primaryTeal,
                             foregroundColor: Colors.white,
                             elevation: 0,
-                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
                             ),
@@ -244,7 +318,7 @@ class _UpdateJobScreenState extends State<UpdateJobScreen> {
   Widget _buildHeader(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 50, 20, 30),
+      padding: const EdgeInsets.fromLTRB(16, 60, 16, 24),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [Color(0xFF081A2F), Color(0xFF0E2A47)],
@@ -252,8 +326,8 @@ class _UpdateJobScreenState extends State<UpdateJobScreen> {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(38),
-          bottomRight: Radius.circular(38),
+          bottomLeft: Radius.circular(32),
+          bottomRight: Radius.circular(32),
         ),
       ),
       child: Row(
@@ -264,7 +338,7 @@ class _UpdateJobScreenState extends State<UpdateJobScreen> {
             icon: const Icon(Icons.arrow_back, color: Colors.white),
           ),
 
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
 
           const Expanded(
             child: Column(
@@ -272,9 +346,9 @@ class _UpdateJobScreenState extends State<UpdateJobScreen> {
               children: [
                 Text(
                   "Admin Action",
-                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                  style: TextStyle(color: Colors.white70, fontSize: 13),
                 ),
-                SizedBox(height: 4),
+                SizedBox(height: 2),
                 Text(
                   "Update Job",
                   style: TextStyle(
@@ -287,7 +361,7 @@ class _UpdateJobScreenState extends State<UpdateJobScreen> {
             ),
           ),
 
-          CircleAvatar(
+          const CircleAvatar(
             backgroundColor: Colors.white24,
             child: Icon(Icons.edit_note, color: Colors.white),
           ),
@@ -301,25 +375,70 @@ class _UpdateJobScreenState extends State<UpdateJobScreen> {
     required String label,
     required IconData icon,
     int maxLines = 1,
+    TextInputType keyboardType = TextInputType.text,
+    String? hintText,
+    String? Function(String?)? validator,
+    bool isOptional = false,
   }) {
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
-      validator: (value) {
-        if (value == null || value.trim().isEmpty) {
-          return "$label is required";
+      keyboardType: keyboardType,
+      validator: validator ?? (value) {
+        if (!isOptional && (value == null || value.trim().isEmpty)) {
+          return "This field is required";
         }
         return null;
       },
       decoration: InputDecoration(
         prefixIcon: Icon(icon, color: primaryTeal),
-        labelText: label,
+        labelText: label.isEmpty ? null : label,
+        hintText: hintText,
+        hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
         filled: true,
         fillColor: const Color(0xFFF8F9FB),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 14,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
         ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: Colors.grey.shade200),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: primaryTeal),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDropdown({
+    required IconData icon,
+    required String value,
+    required List<String> items,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return DropdownButtonFormField<String>(
+      value: value,
+      isExpanded: true,
+      items: items.map((String item) {
+        return DropdownMenuItem<String>(
+          value: item,
+          child: Text(
+            item,
+            style: const TextStyle(fontSize: 13, color: Color(0xFF081A2F)),
+            overflow: TextOverflow.ellipsis,
+          ),
+        );
+      }).toList(),
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        prefixIcon: Icon(icon, color: primaryTeal),
+        filled: true,
+        fillColor: const Color(0xFFF8F9FB),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide.none,
@@ -342,8 +461,8 @@ class _UpdateJobScreenState extends State<UpdateJobScreen> {
       borderRadius: BorderRadius.circular(22),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.06),
-          blurRadius: 14,
+          color: Colors.black.withOpacity(0.05),
+          blurRadius: 16,
           offset: const Offset(0, 6),
         ),
       ],
