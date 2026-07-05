@@ -37,7 +37,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 📝 Header Section
+             
                 const Text(
                   "Create Account",
                   style: TextStyle(

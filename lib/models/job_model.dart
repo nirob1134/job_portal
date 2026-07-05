@@ -9,12 +9,10 @@ class JobModel {
   final DateTime deadline;
   final DateTime createdAt;
   final String adminId;
-
-  // New Fields Added
-  final String workType;       // e.g., "Part-Time", "Full-Time", "Internship"
-  final List<String> requirements; // List of required skills/qualifications
-  final String status;         // e.g., "active", "closed"
-  final int vacancy;           // Number of openings
+  final String workType;
+  final List<String> requirements;
+  final String status;
+  final int vacancy;
 
   JobModel({
     required this.id,
@@ -41,8 +39,6 @@ class JobModel {
       deadline: (map['deadline'] as Timestamp?)?.toDate() ?? DateTime.now(),
       createdAt: (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       adminId: map['adminId'] ?? '',
-
-      // Parsing the new fields safely
       workType: map['workType'] ?? 'Part-Time',
       requirements: List<String>.from(map['requirements'] ?? []),
       status: map['status'] ?? 'active',
@@ -59,8 +55,6 @@ class JobModel {
       'deadline': deadline,
       'createdAt': createdAt,
       'adminId': adminId,
-
-      // Mapping the new fields for Firestore
       'workType': workType,
       'requirements': requirements,
       'status': status,

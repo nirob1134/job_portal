@@ -55,7 +55,7 @@ class _MyProfileState extends State<MyProfile> {
         currentUserData = UserModel.fromMap(safeData);
       }
 
-      // Fetch user_details safely
+
       final detailsDoc = await authProvider.db.collection('user_details').doc(uid).get();
       if (detailsDoc.exists) {
         additionalDetails = detailsDoc.data()!;
@@ -163,7 +163,7 @@ class _MyProfileState extends State<MyProfile> {
       child: Column(
         children: [
           const CircleAvatar(
-            radius: 40, // smaller avatar
+            radius: 40,
             backgroundImage: AssetImage('assets/images/avatar.jpg'),
           ),
           const SizedBox(height: 10),
@@ -171,7 +171,7 @@ class _MyProfileState extends State<MyProfile> {
             currentUserData?.name ?? "Student",
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 20, // slightly smaller text
+              fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -179,7 +179,7 @@ class _MyProfileState extends State<MyProfile> {
             currentUserData?.role ?? "User",
             style: const TextStyle(
               color: Colors.white70,
-              fontSize: 13, // smaller text
+              fontSize: 13,
             ),
           ),
         ],
@@ -211,7 +211,6 @@ class _MyProfileState extends State<MyProfile> {
           ),
           child: Row(
             children: [
-              // Circular Percent Indicator
               CircularPercentIndicator(
                 radius: 50,
                 lineWidth: 10,
@@ -228,7 +227,6 @@ class _MyProfileState extends State<MyProfile> {
 
               const SizedBox(width: 20),
 
-              // Status Texts
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

@@ -10,7 +10,6 @@ class JobDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Formatting the deadline timestamp nicely
     String formattedDeadline = DateFormat('MMM dd, yyyy').format(job.deadline);
 
     return Scaffold(
@@ -28,7 +27,6 @@ class JobDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- HEADER SECTION ---
             Center(
               child: Column(
                 children: [
@@ -57,7 +55,6 @@ class JobDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
 
-                  // Work Type Badge
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                     decoration: BoxDecoration(
@@ -79,7 +76,6 @@ class JobDetailScreen extends StatelessWidget {
 
             const SizedBox(height: 32),
 
-            // --- QUICK INFO GRID (2x2 Layout) ---
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
@@ -110,7 +106,6 @@ class JobDetailScreen extends StatelessWidget {
 
             const SizedBox(height: 32),
 
-            // --- DESCRIPTION SECTION ---
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
@@ -139,7 +134,6 @@ class JobDetailScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            // --- REQUIREMENTS SECTION ---
             if (job.requirements.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -176,7 +170,6 @@ class JobDetailScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // Post Date Timestamp Label
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Text(
@@ -185,12 +178,11 @@ class JobDetailScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 120), // Bottom clear space buffer for fixed bottomSheet
+            const SizedBox(height: 120),
           ],
         ),
       ),
 
-      // --- STICKY APPLY BUTTON ---
       bottomSheet: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
@@ -222,7 +214,6 @@ class JobDetailScreen extends StatelessWidget {
     );
   }
 
-  // Helper Widget for Grid Info Cards
   Widget _infoCard(IconData icon, String label, String value, {Color? valueColor}) {
     return Expanded(
       child: Container(

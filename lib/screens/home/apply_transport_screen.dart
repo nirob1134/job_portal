@@ -30,7 +30,7 @@ class _ApplyTransportScreenState extends State<ApplyTransportScreen> {
   final TextEditingController studentIdCtrl = TextEditingController();
   final TextEditingController semesterCtrl = TextEditingController();
   final TextEditingController cgpaCtrl = TextEditingController();
-  final TextEditingController resumeLinkCtrl = TextEditingController(); // Swapped from Cover Letter
+  final TextEditingController resumeLinkCtrl = TextEditingController();
 
   bool isLoading = false;
 
@@ -129,7 +129,7 @@ class _ApplyTransportScreenState extends State<ApplyTransportScreen> {
       runningSemester: semesterCtrl.text.trim(),
       cgpa: cgpaCtrl.text.trim(),
       route: widget.route,
-      coverLetter: resumeLinkCtrl.text.trim(), // Mapping link to the model's coverLetter field
+      coverLetter: resumeLinkCtrl.text.trim(),
       status: 'pending',
     );
 

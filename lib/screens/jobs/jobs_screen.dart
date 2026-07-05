@@ -112,10 +112,8 @@ class _JobsScreenState extends State<JobsScreen> {
                   Padding(
                     padding: const EdgeInsets.all(16),
                     child: Row(
-                      // CROSSAXISALIGNMENT.CENTER puts the logo in the middle vertically
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        // 1. DIU Logo (Centered)
                         Container(
                           height: 54,
                           width: 54,
@@ -134,10 +132,9 @@ class _JobsScreenState extends State<JobsScreen> {
                         ),
                         const SizedBox(width: 14),
 
-                        // 2. Job Content
                         Expanded(
                           child: Column(
-                            mainAxisSize: MainAxisSize.min, // Takes only needed height
+                            mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
@@ -163,7 +160,6 @@ class _JobsScreenState extends State<JobsScreen> {
                               ),
                               const SizedBox(height: 10),
 
-                              // Wrap handles the overflow automatically
                               Wrap(
                                 spacing: 8,
                                 runSpacing: 6,
@@ -176,7 +172,6 @@ class _JobsScreenState extends State<JobsScreen> {
                           ),
                         ),
 
-                        // 3. Bookmark Icon (Centered)
                         StreamBuilder<bool>(
                           stream: favProvider.isFavourite(job.id),
                           builder: (context, snapshot) {

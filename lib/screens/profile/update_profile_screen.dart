@@ -20,7 +20,6 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
   @override
   void initState() {
     super.initState();
-    // Pre-fill controllers with existing data passed from Profile screen
     _idController = TextEditingController(text: widget.existingData['studentId'] ?? '');
     _deptController = TextEditingController(text: widget.existingData['department'] ?? '');
     _addressController = TextEditingController(text: widget.existingData['address'] ?? '');
@@ -64,7 +63,6 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
               ),
               const SizedBox(height: 30),
 
-              // Input Fields
               _buildInputLabel("Student ID Number"),
               _customTextField(_idController, "e.g. 2024-0012", Icons.fingerprint_rounded),
 
@@ -78,7 +76,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
 
               const SizedBox(height: 40),
 
-              // Submit Button
+
               SizedBox(
                 width: double.infinity,
                 height: 55,
@@ -95,7 +93,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                         department: _deptController.text.trim(),
                         address: _addressController.text.trim(),
                       );
-                      // Return to profile and refresh
+
                       if (mounted) Navigator.pop(context);
                     }
                   },
