@@ -32,18 +32,22 @@ class MenuScreen extends StatelessWidget {
     bool confirm = await showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text("Confirm Logout"),
-        content: const Text("Are you sure you want to logout?"),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text("Confirm Sign Out", style: TextStyle(fontWeight: FontWeight.bold)),
+        content: const Text("Are you sure you want to log out of your account?"),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text("Cancel")),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text("Cancel", style: TextStyle(color: Colors.grey)),
+          ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              backgroundColor: const Color(0xFFEF4444), // Professional red accent
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              elevation: 0,
             ),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text("Logout", style: TextStyle(color: Colors.white)),
+            child: const Text("Sign Out", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -63,23 +67,25 @@ class MenuScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const themeColor = Color(0xFF081A2F);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FB),
+      backgroundColor: const Color(0xFFF4F6F9),
       body: Column(
         children: [
           // ---------- COMPACT DARK HEADER ----------
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(20, 50, 20, 25),
+            padding: const EdgeInsets.fromLTRB(20, 60, 20, 30),
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF081A2F), Color(0xFF0E2A47)],
+                colors: [themeColor, Color(0xFF0E2A47)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(32),
-                bottomRight: Radius.circular(32),
+                bottomLeft: Radius.circular(30),
+                bottomRight: Radius.circular(30),
               ),
             ),
             child: FutureBuilder<Map<String, dynamic>>(
@@ -88,11 +94,13 @@ class MenuScreen extends StatelessWidget {
                 final userData = snapshot.data;
                 return Row(
                   children: [
-                    const CircleAvatar(
-                      radius: 32,
-                      backgroundColor: Colors.white24,
-                      child: CircleAvatar(
-                        radius: 30,
+                    Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white.withOpacity(0.15), width: 2),
+                      ),
+                      child: const CircleAvatar(
+                        radius: 28,
                         backgroundImage: AssetImage('assets/images/avatar.jpg'),
                       ),
                     ),
@@ -108,8 +116,10 @@ class MenuScreen extends StatelessWidget {
                               color: Colors.white,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
+                              letterSpacing: 0.3,
                             ),
                           ),
+                          const SizedBox(height: 2),
                           Text(
                             userData?['email'] ?? "",
                             style: TextStyle(
@@ -120,10 +130,6 @@ class MenuScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    IconButton(
-                      onPressed: () => logout(context),
-                      icon: const Icon(Icons.logout_rounded, color: Colors.redAccent),
-                    ),
                   ],
                 );
               },
@@ -133,34 +139,44 @@ class MenuScreen extends StatelessWidget {
           // ---------- MENU SECTION ----------
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
               physics: const BouncingScrollPhysics(),
               children: [
                 _sectionLabel("Account Settings"),
-                _buildMenuCard(context, Icons.person_rounded, "My Profile", const Color(0xFF4A90E2), () {
+                _buildMenuCard(context, Icons.person_outlined, "My Profile", const Color(0xFF4A90E2), () {
                   Navigator.push(context, MaterialPageRoute(builder: (_) => const MyProfile()));
                 }),
-                _buildMenuCard(context, Icons.favorite_rounded, "Favourite Jobs", const Color(0xFFF05A94), () {
+                _buildMenuCard(context, Icons.favorite_outline_rounded, "Favourite Jobs", const Color(0xFFF05A94), () {
                   Navigator.push(context, MaterialPageRoute(builder: (_) => const FavouriteJobsScreen()));
                 }),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
                 _sectionLabel("Job Dashboard"),
-                _buildMenuCard(context, Icons.business_center_rounded, "Department Jobs", const Color(0xFF4A90E2), () {
+                _buildMenuCard(context, Icons.business_center_outlined, "Department Jobs", const Color(0xFF4A90E2), () {
                   Navigator.push(context, MaterialPageRoute(builder: (_) => const JobsScreen()));
                 }),
-                _buildMenuCard(context, Icons.assignment_turned_in_rounded, "Applied Dept. Jobs", Colors.green, () {
+                _buildMenuCard(context, Icons.assignment_turned_in_outlined, "Applied Dept. Jobs", const Color(0xFF10B981), () {
                   Navigator.push(context, MaterialPageRoute(builder: (_) => const ListOfAppliedJobScreen()));
                 }),
-                _buildMenuCard(context, Icons.local_shipping_rounded, "Transport Jobs", const Color(0xFFF5A623), () {
+                _buildMenuCard(context, Icons.local_shipping_outlined, "Transport Jobs", const Color(0xFFF5A623), () {
                   Navigator.push(context, MaterialPageRoute(builder: (_) => const TransportJobScreen()));
                 }),
-                _buildMenuCard(context, Icons.fact_check_rounded, "Applied Transport Jobs", Colors.teal, () {
+                _buildMenuCard(context, Icons.fact_check_outlined, "Applied Transport Jobs", Colors.teal, () {
                   Navigator.push(context, MaterialPageRoute(builder: (_) => const ListOfAppliedTransportJobScreen()));
                 }),
 
-                const SizedBox(height: 10),
-                _buildMenuCard(context, Icons.help_outline_rounded, "Help Center", Colors.indigo, () {}),
+                const SizedBox(height: 24),
+                _sectionLabel("Session"),
+
+                // Professional Logout Option
+                _buildMenuCard(
+                  context,
+                  Icons.logout_rounded,
+                  "Sign Out",
+                  const Color(0xFFEF4444),
+                      () => logout(context),
+                  isDestructive: true,
+                ),
               ],
             ),
           ),
@@ -171,23 +187,28 @@ class MenuScreen extends StatelessWidget {
 
   Widget _sectionLabel(String text) {
     return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 12),
+      padding: const EdgeInsets.only(left: 4, bottom: 10),
       child: Text(
-        text,
-        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey.shade600, letterSpacing: 0.5),
+        text.toUpperCase(),
+        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF94A3B8), letterSpacing: 0.8),
       ),
     );
   }
 
-  Widget _buildMenuCard(BuildContext context, IconData icon, String title, Color color, VoidCallback onTap) {
+  Widget _buildMenuCard(
+      BuildContext context,
+      IconData icon,
+      String title,
+      Color color,
+      VoidCallback onTap,
+      {bool isDestructive = false}
+      ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4)),
-        ],
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       child: ListTile(
         onTap: onTap,
@@ -195,16 +216,24 @@ class MenuScreen extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.12),
-            borderRadius: BorderRadius.circular(12),
+            color: color.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(icon, color: color, size: 24),
+          child: Icon(icon, color: color, size: 22),
         ),
         title: Text(
           title,
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Color(0xFF2D3142)),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+            color: isDestructive ? const Color(0xFFEF4444) : const Color(0xFF1E293B),
+          ),
         ),
-        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.black26),
+        trailing: Icon(
+          Icons.arrow_forward_ios_rounded,
+          size: 12,
+          color: isDestructive ? const Color(0xFFEF4444).withOpacity(0.4) : const Color(0xFF94A3B8),
+        ),
       ),
     );
   }

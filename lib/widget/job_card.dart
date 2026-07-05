@@ -9,25 +9,18 @@ class JobCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Logic for the Urgent badge (less than 3 days left)
     bool isUrgent = job.deadline.isBefore(DateTime.now().add(const Duration(days: 3)));
     String formattedDeadline = DateFormat('MMM dd, yyyy').format(job.deadline);
 
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
+      margin: const EdgeInsets.only(bottom: 10, left: 2, right: 2), // Removed top margin to tighten structural gaps
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF081A2F).withOpacity(0.06),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2E8F0)), // Standard border look matching dashboard profile blocks
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         child: InkWell(
           onTap: () {
             Navigator.push(
@@ -35,30 +28,27 @@ class JobCard extends StatelessWidget {
               MaterialPageRoute(builder: (_) => JobDetailScreen(job: job)),
             );
           },
-          splashColor: const Color(0xFF4A90E2).withOpacity(0.1),
+          splashColor: const Color(0xFF081A2F).withOpacity(0.05),
           child: Stack(
             children: [
-              // 1. Blue Side Accent
               Positioned(
                 left: 0, top: 0, bottom: 0,
-                child: Container(width: 5, color: const Color(0xFF4A90E2)),
+                child: Container(width: 4, color: const Color(0xFF4A90E2)),
               ),
-
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(14),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center, // Vertically center the logo
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // 2. DIU Logo
                     Container(
-                      height: 56,
-                      width: 56,
+                      height: 52,
+                      width: 52,
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade100),
-                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFF1F5F9)),
+                        borderRadius: BorderRadius.circular(10),
                       ),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(8),
                         child: Image.asset(
                           'assets/images/diu_logo.jpg',
                           fit: BoxFit.cover,
@@ -66,8 +56,6 @@ class JobCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 14),
-
-                    // 3. Main Content
                     Expanded(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -82,8 +70,8 @@ class JobCard extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: Color(0xFF0E2A47),
+                                    fontSize: 15,
+                                    color: Color(0xFF081A2F),
                                   ),
                                 ),
                               ),
@@ -93,21 +81,19 @@ class JobCard extends StatelessWidget {
                           const SizedBox(height: 2),
                           Text(
                             job.department,
-                            style: TextStyle(
-                              color: Colors.grey.shade600,
+                            style: const TextStyle(
+                              color: Color(0xFF64748B),
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                           const SizedBox(height: 10),
-
-                          // 4. Info Chips (Salary & Deadline)
                           Wrap(
                             spacing: 8,
                             runSpacing: 6,
                             children: [
-                              _miniChip(Icons.paid_outlined, "৳${job.salary}", Colors.green),
-                              _miniChip(Icons.event_outlined, formattedDeadline, Colors.orange),
+                              _miniChip(Icons.paid_outlined, "৳${job.salary}", const Color(0xFF10B981)),
+                              _miniChip(Icons.event_outlined, formattedDeadline, const Color(0xFFF5A623)),
                             ],
                           ),
                         ],
@@ -123,20 +109,19 @@ class JobCard extends StatelessWidget {
     );
   }
 
-  // Urgent Badge Widget
   Widget _urgentBadge() {
     return Container(
       margin: const EdgeInsets.only(left: 8),
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: Colors.red.shade50,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.red.shade100),
+        color: const Color(0xFFFEF2F2),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: const Color(0xFFFEE2E2)),
       ),
       child: const Text(
         "URGENT",
         style: TextStyle(
-          color: Colors.red,
+          color: Color(0xFFEF4444),
           fontSize: 9,
           fontWeight: FontWeight.bold,
         ),
@@ -144,13 +129,12 @@ class JobCard extends StatelessWidget {
     );
   }
 
-  // Mini Chip Helper
   Widget _miniChip(IconData icon, String text, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(8),
+        color: color.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

@@ -42,7 +42,7 @@ class JobModel {
       workType: map['workType'] ?? 'Part-Time',
       requirements: List<String>.from(map['requirements'] ?? []),
       status: map['status'] ?? 'active',
-      vacancy: map['vacancy'] ?? 1,
+      vacancy: map['vacancy'] ?? 0,
     );
   }
 

@@ -26,7 +26,7 @@ class FavouriteJobsScreen extends StatelessWidget {
         iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: StreamBuilder(
-        stream: favProvider.favouritesStream(), // Stream of favourite jobs
+        stream: favProvider.favouritesStream(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -58,7 +58,6 @@ class FavouriteJobsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Row: Avatar + Title + Delete button
                     Row(
                       children: [
                         const CircleAvatar(
@@ -82,7 +81,6 @@ class FavouriteJobsScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
 
-                    // Job badges: department, salary, etc.
                     Wrap(
                       spacing: 8,
                       runSpacing: 6,
@@ -103,7 +101,6 @@ class FavouriteJobsScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
 
-                    // Details button
                     Align(
                       alignment: Alignment.centerRight,
                       child: ElevatedButton.icon(
@@ -130,7 +127,6 @@ class FavouriteJobsScreen extends StatelessWidget {
     );
   }
 
-  // Badge widget with overflow fix
   Widget _detailBadge(IconData icon, Color color, String text) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
@@ -138,7 +134,7 @@ class FavouriteJobsScreen extends StatelessWidget {
         color: color.withOpacity(0.15),
         borderRadius: BorderRadius.circular(8),
       ),
-      constraints: const BoxConstraints(maxWidth: 280), // optional max width
+      constraints: const BoxConstraints(maxWidth: 280),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

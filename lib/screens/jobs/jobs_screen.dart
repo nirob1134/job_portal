@@ -5,7 +5,6 @@ import '../../providers/auth_provider/job_provider.dart';
 import '../../providers/auth_provider/favourite_provider.dart';
 import '../home/job_detail_screen.dart';
 
-
 class JobsScreen extends StatefulWidget {
   const JobsScreen({super.key});
 
@@ -14,7 +13,7 @@ class JobsScreen extends StatefulWidget {
 }
 
 class _JobsScreenState extends State<JobsScreen> {
-  TextEditingController searchController = TextEditingController();
+  final TextEditingController searchController = TextEditingController();
   String searchText = '';
 
   @override
@@ -26,50 +25,78 @@ class _JobsScreenState extends State<JobsScreen> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: const Color(0xFF081A2F),
-        title: const Text('DIU Career Portal',
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+        title: const Text(
+          'DIU Career Portal',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18),
+        ),
         centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Column(
         children: [
-
+          // 1. Clean Blue Header Block
           Container(
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 25),
+            width: double.infinity,
+            height: 16,
             decoration: const BoxDecoration(
               color: Color(0xFF081A2F),
               borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(30),
-                  bottomRight: Radius.circular(30)
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(24),
               ),
             ),
+          ),
+
+          // 2. Extracted Uniform Search Field
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
             child: TextField(
               controller: searchController,
               onChanged: (val) => setState(() => searchText = val),
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: Color(0xFF081A2F)),
               decoration: InputDecoration(
                 hintText: 'Search roles, skills, or dept...',
-                hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
-                prefixIcon: const Icon(Icons.search, color: Colors.white70),
+                hintStyle: TextStyle(color: const Color(0xFF081A2F).withOpacity(0.4)),
+                prefixIcon: const Icon(Icons.search, color: Color(0xFF64748B)),
                 filled: true,
-                fillColor: Colors.white.withOpacity(0.1),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide.none
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: Color(0xFF4A90E2), width: 1.5),
                 ),
               ),
             ),
           ),
 
+          // 3. Main Data Stream List
           Expanded(
             child: StreamBuilder<List<JobModel>>(
               stream: searchText.isEmpty
                   ? jobProvider.getJobs()
                   : jobProvider.searchJobs(searchText),
               builder: (context, snapshot) {
-                if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator(color: Color(0xFF081A2F)));
+                }
+
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No open career choices found',
+                      style: TextStyle(color: const Color(0xFF64748B), fontWeight: FontWeight.w300),
+                    ),
+                  );
+                }
+
                 final jobs = snapshot.data!;
                 return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  physics: const BouncingScrollPhysics(),
                   itemCount: jobs.length,
                   itemBuilder: (context, index) => _modernJobCard(context, jobs[index]),
                 );
@@ -85,48 +112,43 @@ class _JobsScreenState extends State<JobsScreen> {
     return Consumer<FavouriteProvider>(
       builder: (context, favProvider, _) {
         return Container(
-          margin: const EdgeInsets.only(bottom: 18),
+          margin: const EdgeInsets.only(bottom: 10, left: 2, right: 2), // Tight architectural spacing
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF081A2F).withOpacity(0.06),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
             child: InkWell(
-              onTap: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => JobDetailScreen(job: job))),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => JobDetailScreen(job: job)),
+              ),
+              splashColor: const Color(0xFF081A2F).withOpacity(0.05),
               child: Stack(
                 children: [
-                  // Blue Accent Strip
                   Positioned(
                     left: 0, top: 0, bottom: 0,
-                    child: Container(width: 6, color: const Color(0xFF4A90E2)),
+                    child: Container(width: 4, color: const Color(0xFF4A90E2)),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(14),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Container(
-                          height: 54,
-                          width: 54,
+                          height: 52,
+                          width: 52,
                           decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(color: Colors.grey.shade100),
-                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xFFF1F5F9)),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(8),
                             child: Image.asset(
-                                'assets/images/diu_logo.jpg',
-                                fit: BoxFit.cover
+                              'assets/images/diu_logo.jpg',
+                              fit: BoxFit.cover,
                             ),
                           ),
                         ),
@@ -142,9 +164,9 @@ class _JobsScreenState extends State<JobsScreen> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF0E2A47)
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                  color: Color(0xFF081A2F),
                                 ),
                               ),
                               const SizedBox(height: 2),
@@ -153,9 +175,9 @@ class _JobsScreenState extends State<JobsScreen> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500
+                                  color: Color(0xFF64748B),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                               const SizedBox(height: 10),
@@ -164,8 +186,8 @@ class _JobsScreenState extends State<JobsScreen> {
                                 spacing: 8,
                                 runSpacing: 6,
                                 children: [
-                                  _softChip(Icons.paid_outlined, job.salary, Colors.green),
-                                  _softChip(Icons.timer_outlined, "Full-time", Colors.blue),
+                                  _softChip(Icons.paid_outlined, "৳${job.salary}", const Color(0xFF10B981)),
+                                  _softChip(Icons.timer_outlined, "Full-time", const Color(0xFF4A90E2)),
                                 ],
                               ),
                             ],
@@ -181,8 +203,8 @@ class _JobsScreenState extends State<JobsScreen> {
                               constraints: const BoxConstraints(),
                               icon: Icon(
                                 isFav ? Icons.bookmark : Icons.bookmark_border_rounded,
-                                color: isFav ? const Color(0xFF4A90E2) : Colors.grey.shade300,
-                                size: 26,
+                                color: isFav ? const Color(0xFF4A90E2) : const Color(0xFF94A3B8),
+                                size: 22,
                               ),
                               onPressed: () => favProvider.toggleFavourite(job),
                             );
@@ -202,17 +224,20 @@ class _JobsScreenState extends State<JobsScreen> {
 
   Widget _softChip(IconData icon, String label, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(8),
+        color: color.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: color),
+          Icon(icon, size: 12, color: color),
           const SizedBox(width: 4),
-          Text(label,
-              style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold)),
+          Text(
+            label,
+            style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold),
+          ),
         ],
       ),
     );

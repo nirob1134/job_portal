@@ -37,11 +37,9 @@ class _MyProfileState extends State<MyProfile> {
     }
 
     try {
-
       final userDoc = await authProvider.db.collection('users').doc(uid).get();
       if (userDoc.exists) {
         final data = userDoc.data()!;
-
 
         final safeData = {
           'uid': data['uid'] ?? uid,
@@ -54,7 +52,6 @@ class _MyProfileState extends State<MyProfile> {
 
         currentUserData = UserModel.fromMap(safeData);
       }
-
 
       final detailsDoc = await authProvider.db.collection('user_details').doc(uid).get();
       if (detailsDoc.exists) {
@@ -75,32 +72,34 @@ class _MyProfileState extends State<MyProfile> {
 
     if (isLoading) {
       return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+        body: Center(child: CircularProgressIndicator(color: Color(0xFF081A2F))),
       );
     }
 
     final firebaseUser = authProvider.auth.currentUser;
     if (firebaseUser == null) {
       return const Scaffold(
-        body: Center(child: Text("Session expired. Please login again.")),
+        body: Center(child: Text("Session expired. Please login again.", style: TextStyle(color: Colors.grey))),
       );
     }
 
     final userId = firebaseUser.uid;
+    const themeColor = Color(0xFF081A2F);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FB),
+      backgroundColor: const Color(0xFFF4F6F9),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF081A2F),
+        elevation: 0,
+        backgroundColor: themeColor,
         centerTitle: true,
         title: const Text(
           "My Profile",
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600, letterSpacing: 0.5),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit, color: Colors.white),
+            icon: const Icon(Icons.edit_outlined, color: Colors.white),
             onPressed: () {
               Navigator.push(
                 context,
@@ -113,33 +112,37 @@ class _MyProfileState extends State<MyProfile> {
         ],
       ),
       body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
         child: Column(
           children: [
-            _buildHeader(),
+            _buildHeader(themeColor),
             Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildApplicationChart(appProvider, userId),
-                  const SizedBox(height: 25),
+                  _buildApplicationChart(appProvider, userId, themeColor),
+                  const SizedBox(height: 30),
                   const Text(
                     "Academic & Personal Details",
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF0E2A47),
+                      color: themeColor,
+                      letterSpacing: 0.3,
                     ),
                   ),
-                  const SizedBox(height: 15),
-                  _infoTile(Icons.badge, "Student ID", additionalDetails['studentId'] ?? "Not Set"),
-                  _infoTile(Icons.school, "Department", additionalDetails['department'] ?? "Not Set"),
-                  _infoTile(Icons.location_on, "Address", additionalDetails['address'] ?? "Not Set"),
-                  const Divider(height: 40),
-                  _infoTile(Icons.phone, "Phone", currentUserData?.phone ?? "Not Set"),
-                  _infoTile(Icons.email, "Email", currentUserData?.email ?? "Not Set"),
-                  const SizedBox(height: 30),
-
+                  const SizedBox(height: 16),
+                  _infoTile(Icons.badge_outlined, "Student ID", additionalDetails['studentId'] ?? "Not Set", themeColor),
+                  _infoTile(Icons.school_outlined, "Department", additionalDetails['department'] ?? "Not Set", themeColor),
+                  _infoTile(Icons.location_on_outlined, "Address", additionalDetails['address'] ?? "Not Set", themeColor),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    child: Divider(color: Color(0xFFE2E8F0), height: 30),
+                  ),
+                  _infoTile(Icons.phone_outlined, "Phone", currentUserData?.phone ?? "Not Set", themeColor),
+                  _infoTile(Icons.email_outlined, "Email", currentUserData?.email ?? "Not Set", themeColor),
+                  const SizedBox(height: 20),
                 ],
               ),
             )
@@ -149,37 +152,54 @@ class _MyProfileState extends State<MyProfile> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(Color themeColor) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.only(bottom: 20, top: 15),
-      decoration: const BoxDecoration(
-        color: Color(0xFF081A2F),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(35),
-          bottomRight: Radius.circular(35),
+      padding: const EdgeInsets.only(bottom: 30, top: 10),
+      decoration: BoxDecoration(
+        color: themeColor,
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(30),
+          bottomRight: Radius.circular(30),
         ),
       ),
       child: Column(
         children: [
-          const CircleAvatar(
-            radius: 40,
-            backgroundImage: AssetImage('assets/images/avatar.jpg'),
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white.withOpacity(0.2), width: 3),
+            ),
+            child: const CircleAvatar(
+              radius: 45,
+              backgroundImage: AssetImage('assets/images/avatar.jpg'),
+            ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 14),
           Text(
             currentUserData?.name ?? "Student",
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 20,
+              fontSize: 22,
               fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
             ),
           ),
-          Text(
-            currentUserData?.role ?? "User",
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 13,
+          const SizedBox(height: 4),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              (currentUserData?.role ?? "User").toUpperCase(),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1,
+              ),
             ),
           ),
         ],
@@ -187,8 +207,7 @@ class _MyProfileState extends State<MyProfile> {
     );
   }
 
-
-  Widget _buildApplicationChart(ApplicationProvider appProvider, String userId) {
+  Widget _buildApplicationChart(ApplicationProvider appProvider, String userId, Color themeColor) {
     return StreamBuilder<List<ApplicationModel>>(
       stream: appProvider.getApplicationsByUser(userId),
       builder: (context, snapshot) {
@@ -201,39 +220,35 @@ class _MyProfileState extends State<MyProfile> {
         final percent = total == 0 ? 0.0 : (accepted / total).toDouble();
 
         return Container(
-          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4)),
-            ],
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
           ),
           child: Row(
             children: [
               CircularPercentIndicator(
-                radius: 50,
-                lineWidth: 10,
+                radius: 46,
+                lineWidth: 8,
                 percent: percent,
                 animation: true,
                 center: Text(
                   "${(percent * 100).toInt()}%",
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: themeColor),
                 ),
-                progressColor: Colors.blue,
-                backgroundColor: Colors.grey.withOpacity(0.2),
+                progressColor: const Color(0xFF10B981), // Professional green success accent
+                backgroundColor: const Color(0xFFF1F5F9),
                 circularStrokeCap: CircularStrokeCap.round,
               ),
-
-              const SizedBox(width: 20),
-
+              const SizedBox(width: 24),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _statusRow("Accepted", accepted, Colors.green),
-                    _statusRow("Rejected", rejected, Colors.redAccent),
-                    _statusRow("Total Applied", total, Colors.blue),
+                    _statusRow("Accepted", accepted, const Color(0xFF10B981)),
+                    _statusRow("Rejected", rejected, const Color(0xFFEF4444)),
+                    _statusRow("Total Applied", total, themeColor),
                   ],
                 ),
               ),
@@ -244,42 +259,53 @@ class _MyProfileState extends State<MyProfile> {
     );
   }
 
-// Helper Widget for colored rows
   Widget _statusRow(String label, int value, Color color) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
           Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           Text(
-            "$label: $value",
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: color),
+            label,
+            style: const TextStyle(fontSize: 13, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
+          ),
+          const Spacer(),
+          Text(
+            "$value",
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: color),
           ),
         ],
       ),
     );
   }
 
-
-  Widget _infoTile(IconData icon, String title, String value) {
+  Widget _infoTile(IconData icon, String title, String value, Color themeColor) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(15),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       child: Row(
         children: [
-          Icon(icon, color: Colors.blue),
-          const SizedBox(width: 15),
+          Icon(icon, color: themeColor.withOpacity(0.7), size: 22),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                    title,
+                    style: const TextStyle(fontSize: 11, color: Color(0xFF94A3B8), fontWeight: FontWeight.w500)
+                ),
+                const SizedBox(height: 2),
+                Text(
+                    value,
+                    style: TextStyle(fontWeight: FontWeight.w600, color: themeColor, fontSize: 14)
+                ),
               ],
             ),
           ),
